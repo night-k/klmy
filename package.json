@@ -1,0 +1,28 @@
+{
+  "name": "sales-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "build:pages": "node scripts/build-pages.mjs",
+    "serve:pages": "node scripts/serve-pages.mjs",
+    "preview:pages": "npm run build:pages && npm run serve:pages",
+    "preview": "npm run preview:pages"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
+    "@smallwei/avue": "^3.6.3",
+    "axios": "^0.21.4",
+    "dayjs": "^1.11.13",
+    "element-plus": "^2.7.3",
+    "vue": "^3.4.37",
+    "vue-router": "^4.3.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "sass": "^1.77.2",
+    "vite": "^5.2.12"
+  }
+}

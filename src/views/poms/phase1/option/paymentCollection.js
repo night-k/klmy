@@ -1,0 +1,41 @@
+import { PAYMENT_STATUS } from './dict';
+
+export const Option = _this => ({
+  border: true,
+  index: true,
+  viewBtn: false,
+  editBtn: false,
+  delBtn: false,
+  addBtn: false,
+  selection: false,
+  menuWidth: 100,
+  searchSpan: 6,
+  searchMenuSpan: 6,
+  searchLabelWidth: 110,
+  labelWidth: 120,
+  overHidden: true,
+  column: [
+    {
+      label: '项目名称',
+      prop: 'projectId',
+      search: true,
+      hide: true,
+      searchslot: true,
+    },
+    {
+      label: '合同名称',
+      prop: 'contractId',
+      search: true,
+      hide: true,
+      searchslot: true,
+    },
+    { label: '合同编号', prop: 'contractCode', search: true, minWidth: 130 },
+    { label: '客户名称', prop: 'customerName', search: true, minWidth: 160 },
+    { label: '项目名称', prop: 'projectName', minWidth: 180 },
+    { label: '计划总额', prop: 'planTotal', minWidth: 120 },
+    { label: '已收金额', prop: 'receivedTotal', minWidth: 120 },
+    { label: '待收金额', prop: 'pendingTotal', minWidth: 120 },
+    { label: '节点进度', prop: 'nodeProgress', minWidth: 100 },
+    { label: '回款状态', prop: 'status', type: 'select', dicData: PAYMENT_STATUS, search: true, minWidth: 100 },
+  ],
+});

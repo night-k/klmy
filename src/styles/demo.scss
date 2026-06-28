@@ -1,0 +1,37 @@
+/* 演示工程基础样式 — 固定白色主题 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: #303133;
+  -webkit-font-smoothing: antialiased;
+}
+
+.el-card {
+  --el-card-border-color: #ebeef5;
+}
+
+.basic-container {
+  padding: 10px 6px 0;
+  box-sizing: border-box;
+
+  &__card {
+    width: 100%;
+    border: none;
+    box-shadow: none !important;
+  }
+
+  &:first-child {
+    padding-top: 0;
+  }
+}
+
+.avue-crud {
+  .avue-crud__search {
+    background: #fff;
+  }
+}

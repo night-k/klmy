@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>POMS 主线流程总览</title>
+<style>
+  :root {
+    --c-bg: #f5f7fa;
+    --c-card: #ffffff;
+    --c-text: #1f2937;
+    --c-text-soft: #6b7280;
+    --c-border: #e5e7eb;
+    --c-primary: #1890ff;
+    --c-primary-soft: #e6f4ff;
+    --c-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --c-shadow-hover: 0 6px 16px rgba(24,144,255,.18), 0 3px 6px rgba(0,0,0,.04);
+
+    /* 业务域配色 */
+    --d-sale: #1890ff;
+    --d-project: #722ed1;
+    --d-quality: #13c2c2;
+    --d-knowledge: #52c41a;
+    --d-hr: #fa8c16;
+    --d-collab: #eb2f96;
+    --d-bi: #faad14;
+    --d-system: #595959;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--c-bg);
+    color: var(--c-text);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ============ 顶部 ============ */
+  header.topbar {
+    background: linear-gradient(135deg, #1890ff 0%, #0050b3 100%);
+    color: #fff;
+    padding: 24px 32px 18px;
+    box-shadow: 0 2px 8px rgba(0,80,179,.18);
+  }
+  .topbar h1 {
+    margin: 0 0 16px;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: .5px;
+  }
+
+  .demo-entry-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 22px;
+    background: #fff;
+    color: #0050b3;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .demo-entry-btn:hover {
+    color: #003a8c;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  }
+
+  /* ============ Tab 切换 ============ */
+  .tabs {
+    background: var(--c-card);
+    padding: 0 24px;
+    border-bottom: 1px solid var(--c-border);
+    display: flex;
+    overflow-x: auto;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .tab {
+    padding: 14px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--c-text-soft);
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tab:hover { color: var(--c-primary); }
+  .tab.active {
+    color: var(--c-primary);
+    border-bottom-color: var(--c-primary);
+    font-weight: 600;
+  }
+  .tab .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .tab .badge {
+    font-size: 11px;
+    padding: 1px 7px;
+    background: #f0f0f0;
+    color: var(--c-text-soft);
+    border-radius: 10px;
+    margin-left: 4px;
+  }
+
+  /* ============ 主区域 ============ */
+  main {
+    padding: 24px 32px 80px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  .pipeline-intro {
+    background: var(--c-card);
+    padding: 18px 22px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--c-primary);
+    box-shadow: var(--c-shadow);
+  }
+  .pipeline-intro h2 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .pipeline-intro p {
+    margin: 0;
+    color: var(--c-text-soft);
+    font-size: 13px;
+  }
+
+  /* ============ 流程图画布 ============ */
+  .canvas {
+    background: var(--c-card);
+    border-radius: 8px;
+    padding: 30px 22px;
+    box-shadow: var(--c-shadow);
+    overflow-x: auto;
+  }
+  .pipeline {
+    display: none;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0;
+    min-width: max-content;
+  }
+  .pipeline.active { display: flex; }
+
+  /* 节点 */
+  .node {
+    background: #fff;
+    border: 2px solid var(--c-border);
+    border-radius: 10px;
+    padding: 14px 14px 12px;
+    width: 200px;
+    cursor: pointer;
+    position: relative;
+    transition: all .2s;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 12px 0;
+  }
+  .node:hover {
+    transform: translateY(-3px);
+    border-color: var(--node-color, var(--c-primary));
+    box-shadow: var(--c-shadow-hover);
+  }
+  .node .node-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--c-border);
+  }
+  .node .node-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--c-text);
+  }
+  .node .node-section {
+    font-size: 11px;
+    color: var(--node-color, var(--c-primary));
+    background: var(--node-color, var(--c-primary))14;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .node .node-domain {
+    font-size: 11px;
+    color: var(--c-text-soft);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .node .node-domain::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--node-color, var(--c-primary));
+  }
+  .node .node-desc {
+    font-size: 12px;
+    color: var(--c-text-soft);
+    line-height: 1.5;
+    min-height: 36px;
+  }
+  .node .node-cta {
+    font-size: 11px;
+    color: var(--node-color, var(--c-primary));
+    margin-top: auto;
+    font-weight: 500;
+  }
+
+  /* 节点类型:起点/终点/决策 */
+  .node.start { border-style: dashed; }
+  .node.end { background: linear-gradient(135deg, #fff, #f6ffed); }
+  .node.decision { border-radius: 4px; }
+
+  /* 连线 */
+  .arrow {
+    align-self: center;
+    width: 36px;
+    min-width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .arrow svg { width: 100%; height: 14px; }
+  .arrow .arrow-label {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: var(--c-text-soft);
+    background: var(--c-card);
+    padding: 0 4px;
+    white-space: nowrap;
+  }
+  .arrow.down {
+    width: 100%;
+    height: 30px;
+    min-width: 0;
+  }
+  .arrow.down svg { transform: rotate(90deg); width: 30px; height: 14px; }
+
+  /* 横向多通道(用于主线一) */
+  .pipeline-wrap { display: flex; flex-direction: column; gap: 10px; }
+  .lane {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 8px 12px;
+    background: #fafbfc;
+    border-radius: 6px;
+    border-left: 3px solid var(--lane-color, var(--c-primary));
+  }
+  .lane-title {
+    width: 110px;
+    min-width: 110px;
+    font-size: 12px;
+    color: var(--c-text-soft);
+    font-weight: 600;
+    padding-right: 12px;
+  }
+
+  /* ============ 详情抽屉 ============ */
+  .drawer-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.32);
+    z-index: 50;
+    display: none;
+  }
+  .drawer-mask.open { display: block; }
+  .drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 460px;
+    max-width: 92vw;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -4px 0 24px rgba(0,0,0,.12);
+    z-index: 60;
+    transform: translateX(100%);
+    transition: transform .28s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-head {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--c-border);
+    background: var(--c-primary-soft);
+  }
+  .drawer-head .dh-domain {
+    font-size: 11px;
+    color: var(--c-text-soft);
+    margin-bottom: 4px;
+  }
+  .drawer-head h3 {
+    margin: 0 0 4px;
+    font-size: 18px;
+    color: var(--c-text);
+  }
+  .drawer-head .dh-section {
+    font-size: 12px;
+    color: var(--c-primary);
+  }
+  .drawer-close {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 22px;
+    color: var(--c-text-soft);
+    line-height: 1;
+  }
+  .drawer-close:hover { color: var(--c-text); }
+  .drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 22px 24px;
+  }
+  .drawer-body section { margin-bottom: 18px; }
+  .drawer-body h4 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: var(--c-text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .drawer-body h4::before {
+    content: '';
+    width: 3px;
+    height: 14px;
+    background: var(--c-primary);
+    border-radius: 2px;
+  }
+  .drawer-body p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--c-text-soft);
+    line-height: 1.7;
+  }
+  .field-list, .rule-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .field-list li, .rule-list li {
+    font-size: 13px;
+    padding: 5px 0 5px 14px;
+    color: var(--c-text);
+    position: relative;
+    line-height: 1.6;
+  }
+  .field-list li::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 14px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--c-primary);
+    opacity: .65;
+  }
+  .rule-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    top: 5px;
+    color: #52c41a;
+    font-weight: bold;
+    font-size: 12px;
+  }
+  .upstream-downstream {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .ud-card {
+    background: #fafbfc;
+    border: 1px solid var(--c-border);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .ud-card .ud-label {
+    font-size: 11px;
+    color: var(--c-text-soft);
+    margin-bottom: 4px;
+  }
+  .ud-card .ud-name {
+    font-size: 13px;
+    color: var(--c-text);
+    font-weight: 500;
+  }
+
+  /* ============ 图例 ============ */
+  .legend {
+    background: var(--c-card);
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin-top: 20px;
+    box-shadow: var(--c-shadow);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    font-size: 12px;
+    color: var(--c-text-soft);
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-item .ldot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+  }
+
+  /* ============ 响应式 ============ */
+  @media (max-width: 768px) {
+    header.topbar { padding: 18px 16px 14px; }
+    main { padding: 16px; }
+    .node { width: 160px; }
+    .drawer { width: 100vw; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <h1>POMS 石油服务运营管理系统 · 主线流程总览</h1>
+  <a id="demo-entry-link" class="demo-entry-btn" href="./demo/index.html#/poms/phase1/index">进入销售 Mock 演示 →</a>
+</header>
+
+<nav class="tabs" id="tabs">
+  <div class="tab active" data-pipe="sales">
+    <span class="dot" style="background:var(--d-sale)"></span>
+    主线一:商机 → 回款<span class="badge">销售</span>
+  </div>
+  <div class="tab" data-pipe="project">
+    <span class="dot" style="background:var(--d-project)"></span>
+    主线二:立项 → 验收<span class="badge">项目</span>
+  </div>
+  <div class="tab" data-pipe="knowledge">
+    <span class="dot" style="background:var(--d-knowledge)"></span>
+    主线三:成果 → 知识<span class="badge">沉淀</span>
+  </div>
+  <div class="tab" data-pipe="talent">
+    <span class="dot" style="background:var(--d-hr)"></span>
+    主线四:招聘 → 投标<span class="badge">人才</span>
+  </div>
+  <div class="tab" data-pipe="collab">
+    <span class="dot" style="background:var(--d-collab)"></span>
+    横向:协同与预警<span class="badge">贯穿</span>
+  </div>
+</nav>
+
+<main>
+  <div id="intro-container"></div>
+  <div class="canvas">
+    <div id="pipelines-container"></div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><span class="ldot" style="background:var(--d-sale)"></span>销售管理</div>
+    <div class="legend-item"><span class="ldot" style="background:var(--d-project)"></span>项目管理</div>
+    <div class="legend-item"><span class="ldot" style="background:var(--d-quality)"></span>质量管理</div>
+    <div class="legend-item"><span class="ldot" style="background:var(--d-knowledge)"></span>知识管理</div>
+    <div class="legend-item"><span class="ldot" style="background:var(--d-hr)"></span>人力资源</div>
+    <div class="legend-item"><span class="ldot" style="background:var(--d-collab)"></span>协同办公</div>
+    <div class="legend-item"><span class="ldot" style="background:var(--d-bi)"></span>BI 分析</div>
+    <div class="legend-item"><span class="ldot" style="background:var(--d-system)"></span>系统/验收</div>
+    <div class="legend-item" style="margin-left:auto;color:#999">点击任意节点查看详情 →</div>
+  </div>
+</main>
+
+<!-- 详情抽屉 -->
+<div class="drawer-mask" id="drawerMask"></div>
+<aside class="drawer" id="drawer">
+  <button class="drawer-close" id="drawerClose">×</button>
+  <div class="drawer-head">
+    <div class="dh-domain" id="dhDomain"></div>
+    <h3 id="dhName"></h3>
+    <div class="dh-section" id="dhSection"></div>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</aside>
+
+<script>
+/* ============ 业务域配色 ============ */
+const DOMAIN_COLOR = {
+  sale: '#1890ff', project: '#722ed1', quality: '#13c2c2',
+  knowledge: '#52c41a', hr: '#fa8c16', collab: '#eb2f96',
+  bi: '#faad14', system: '#595959', finance: '#fa541c'
+};
+const DOMAIN_LABEL = {
+  sale: '销售管理', project: '项目管理', quality: '质量管理',
+  knowledge: '知识管理', hr: '人力资源', collab: '协同办公',
+  bi: 'BI 分析', system: '系统/验收', finance: '财务'
+};
+
+/* ============ 主线数据 ============ */
+const PIPELINES = {
+  sales: {
+    name: '主线一:商机 → 回款',
+    label: '销售主线',
+    color: DOMAIN_COLOR.sale,
+    description: '从销售线索到最终回款的全生命周期,贯穿商机、招投标、合同、立项、验收、回款。这是 POMS 业务对象流转最完整的主线,涉及销售、项目、协同三大域的协作。',
+    nodes: [
+      { id:'opp', name:'商机登记', section:'3.1', domain:'sale',
+        desc:'建立商机台账,记录客户、项目、预计金额、阶段、跟进记录。',
+        fields:['商机编号','商机来源','客户名称','项目名称','预计金额','当前阶段','跟进人','跟进记录(子表)'],
+        rules:['同客户可多商机并行','阶段顺序推进允许回退','进入"已赢"前必须存在客户档案'],
+        upstream:null, downstream:'tender' },
+      { id:'tender', name:'招投标管理', section:'3.2', domain:'sale',
+        desc:'登记招标信息、上传投标文件、记录开标时间与中标结果。',
+        fields:['投标编号','关联商机','招标单位','招标方式','招标文件','投标文件','投标报价','开标时间','中标结果','投标保证金'],
+        rules:['投标截止前 24h 自动提醒跟进人','投标保证金同步到项目费用','中标通知书上传后触发中标管理'],
+        upstream:'opp', downstream:'winbid' },
+      { id:'winbid', name:'中标管理', section:'3.3', domain:'sale',
+        desc:'上传中标通知书,记录中标金额/日期,驱动合同起草。',
+        fields:['中标编号','关联投标','中标通知书','中标金额','中标日期','服务期','履约保证金','中标服务费','合同状态'],
+        rules:['中标金额不得高于投标报价','中标通知书必传','履约保证金/中标服务费同步到项目费用'],
+        upstream:'tender', downstream:'contract' },
+      { id:'contract', name:'合同起草 + OCR', section:'3.4 / 3.6', domain:'sale',
+        desc:'起草合同,支持 OCR 自动识别客户/金额/付款节点。',
+        fields:['合同编号','关联中标/商机','客户名称','项目名称','合同类型','服务内容','服务周期','合同金额','付款计划(子表)','合同附件'],
+        rules:['合同必须关联中标或商机','合同金额与中标金额不一致需说明','产品明细语义调整为服务内容'],
+        upstream:'winbid', downstream:'approval' },
+      { id:'approval', name:'合同审批(OA 集成)', section:'3.5', domain:'collab',
+        desc:'对接现有 OA 工作流,提交合同审批。',
+        fields:['审批流程','审批人','审批意见','审批结果','用印类型','用印次数'],
+        rules:['不同合同类型/金额走不同审批流','审批拒绝回到草稿状态','前端只透传,流程定义由 flow 模块决定'],
+        upstream:'contract', downstream:'seal' },
+      { id:'seal', name:'用印申请', section:'8.2', domain:'collab',
+        desc:'审批通过后申请用印,准备签订。',
+        fields:['用印类型','用印用途','用印次数','合同附件份数'],
+        rules:['默认 1 正本 + N 副本','用印由印章管理员执行'],
+        upstream:'approval', downstream:'sign' },
+      { id:'sign', name:'合同签订', section:'3.4', domain:'sale',
+        desc:'合同状态变更为"已签",触发项目立项入口。',
+        fields:['签约时间','合同正本','用印记录','合同状态'],
+        rules:['"已签"自动触发项目立项入口','一个合同可立项多个项目'],
+        upstream:'seal', downstream:'projectInit' },
+      { id:'projectInit', name:'项目立项', section:'4.1', domain:'project',
+        desc:'从合同继承客户/合同信息,创建项目。',
+        fields:['项目编号','客户名称(继承)','项目名称','合同金额(继承)','服务周期(继承)','项目经理'],
+        rules:['入口嵌入合同详情页','不再保留独立"新增项目"录入','合同已签后出现"项目立项"按钮'],
+        upstream:'sign', downstream:'accept' },
+      { id:'accept', name:'项目验收', section:'4.12', domain:'project',
+        desc:'(项目执行完成后)客户验收 + 内部签批,触发尾款。',
+        fields:['验收编号','关联项目','客户验收报告','验收意见','验收结论','关联合同'],
+        rules:['所有任务完成 + 最终里程碑待验收才能发起','通过触发尾款/质保金回款节点','不通过进入整改流程'],
+        upstream:'projectInit', downstream:'payment' },
+      { id:'payment', name:'回款管理', section:'3.8', domain:'sale',
+        desc:'按合同维护回款计划,登记实际回款,到期预警。',
+        fields:['关联合同','计划回款日期','计划金额','计划节点','计划比例','实际回款日期','实际金额','回款方式','回款凭证','开票状态','状态'],
+        rules:['入口从合同进,移出项目管理菜单','付款计划与回款计划一一对应','到期/逾期自动预警'],
+        upstream:'accept', downstream:null, isEnd:true }
+    ]
+  },
+
+  project: {
+    name: '主线二:立项 → 验收',
+    label: '项目主线',
+    color: DOMAIN_COLOR.project,
+    description: '项目执行的核心闭环 —— 从合同立项、开题报告、项目计划、任务派发,到成果审核、里程碑、项目验收。体现了"质量"语义从制造业的"产品质检"切换为服务业的"成果审核 + 闭环整改"。',
+    nodes: [
+      { id:'init', name:'项目立项', section:'4.1', domain:'project',
+        desc:'合同已签后,从合同详情页发起立项。',
+        fields:['项目编号','项目名称','关联合同','关联客户','项目经理','项目预算'],
+        rules:['合同状态"已签"才出现立项按钮','自动继承客户/合同信息','不重复录入'],
+        upstream:null, downstream:'attr' },
+      { id:'attr', name:'项目属性补充', section:'4.2', domain:'project',
+        desc:'立项后补充合作类型、服务类型等属性。',
+        fields:['项目合作类型(自营/联营)','合作公司','服务类型(技术服务/其他)','计划起止日期','项目描述'],
+        rules:['联营时合作公司必填','项目预算不得高于合同金额'],
+        upstream:'init', downstream:'proposal' },
+      { id:'proposal', name:'开题报告', section:'4.3', domain:'project',
+        desc:'项目经理上传开题报告,作为里程碑 1。',
+        fields:['报告标题','报告正文','团队成员(子表)','服务内容','技术路线','进度安排','附件','审核状态'],
+        rules:['附件必传','团队成员自动同步到项目角色','通过后自动驱动项目计划生成'],
+        upstream:'attr', downstream:'plan' },
+      { id:'plan', name:'项目计划', section:'4.5', domain:'project',
+        desc:'(原生产计划改造)项目周期规划,拆分阶段与任务。',
+        fields:['关联项目','计划版本','计划起止日期','阶段(子表)','任务(子表)','前置任务','工作量'],
+        rules:['开题报告通过后才能制定','计划生效后驱动甘特图与任务派发','支持版本变更'],
+        upstream:'proposal', downstream:'gantt' },
+      { id:'gantt', name:'甘特图 + 任务管理', section:'4.6 / 4.7', domain:'project',
+        desc:'自动渲染甘特图(默认周维度);任务由工单改造而来。',
+        fields:['任务编号','任务名称','所属阶段','任务说明','责任人','计划起止','实际起止','前置任务','任务状态','成果物(子表)'],
+        rules:['默认时间维度为"周"','任务状态机:待派发→已派发→进行中→待审核→完成/驳回','逾期自动标记'],
+        upstream:'plan', downstream:'dispatch' },
+      { id:'dispatch', name:'任务派发', section:'4.8', domain:'project',
+        desc:'一人多任务、多任务并行执行。',
+        fields:['任务','责任人','计划起止','派发说明','派发人','派发时间'],
+        rules:['批量派发','显示责任人当前并行任务数','负荷超阈值提示','支持改派'],
+        upstream:'gantt', downstream:'exec' },
+      { id:'exec', name:'任务执行 + 成果上传', section:'4.10', domain:'project',
+        desc:'责任人执行任务,上传成果物。',
+        fields:['成果物名称','所属任务','所属里程碑','文件类型','文件附件','版本号','审核状态'],
+        rules:['支持多版本,默认显示最新','不通过则任务返工,非简单重传','同一成果物可多版本'],
+        upstream:'dispatch', downstream:'review' },
+      { id:'review', name:'成果审核', section:'5.1', domain:'quality',
+        desc:'技术负责人审核成果,通过/驳回。',
+        fields:['任务','成果物清单','审核人','审核结论','审核意见','整改要求'],
+        rules:['仅技术负责人可审核','驳回必须填意见,自动同步到责任人待办','所有成果物逐一审核'],
+        upstream:'exec', downstream:'branch' },
+      { id:'branch', name:'问题整改(驳回闭环)', section:'5.2', domain:'quality',
+        desc:'驳回时记录问题与整改意见,形成闭环管理。',
+        fields:['整改单号','关联任务','问题描述','整改要求','整改责任人','整改期限','整改说明','整改附件','验证结果'],
+        rules:['驳回自动生成整改单','整改单闭环:待整改→整改中→已整改→已验证→已关闭','再次驳回整改次数+1(进入质量统计)'],
+        upstream:'review', downstream:'milestone', isDecision:true },
+      { id:'milestone', name:'里程碑验收', section:'4.9', domain:'project',
+        desc:'项目关键节点及阶段验收点(重新设计)。',
+        fields:['里程碑名称','里程碑类型','计划完成日期','实际完成日期','验收人','验收意见','交付物清单','状态'],
+        rules:['默认模板:开题/中期/成果交付/项目验收','所有交付物通过才能整体通过','逾期自动预警'],
+        upstream:'branch', downstream:'accept' },
+      { id:'accept', name:'项目验收', section:'4.12', domain:'project',
+        desc:'最终验收,客户报告归档,触发尾款回款。',
+        fields:['验收编号','关联项目','验收类型','客户验收报告','验收意见','验收结论','整改要求','关联合同'],
+        rules:['通过:项目"已验收",触发尾款回款','不通过:进入整改流程','验收报告归档到知识管理'],
+        upstream:'milestone', downstream:null, isEnd:true }
+    ]
+  },
+
+  knowledge: {
+    name: '主线三:成果 → 知识',
+    label: '知识沉淀',
+    color: DOMAIN_COLOR.knowledge,
+    description: '把项目过程中产生的成果物沉淀为公司知识资产,服务于投标复用、培训参考、年检调阅。文档中心不是"网盘",而是与业务对象强关联的归档中心。',
+    nodes: [
+      { id:'upload', name:'成果物上传', section:'4.10', domain:'project',
+        desc:'责任人完成任务后上传成果文件。',
+        fields:['成果物名称','所属任务','文件类型','文件附件','版本号'],
+        rules:['支持多文件','版本管理','文件类型决定预览方式'],
+        upstream:null, downstream:'review' },
+      { id:'review', name:'成果审核通过', section:'5.1', domain:'quality',
+        desc:'技术负责人审核通过,触发归档。',
+        fields:['审核人','审核结论','审核时间','审核意见'],
+        rules:['审核通过是归档的前置条件','驳回则返工,不进入归档'],
+        upstream:'upload', downstream:'archive' },
+      { id:'archive', name:'自动归档到文档中心', section:'6.1', domain:'knowledge',
+        desc:'成果审核通过后,自动归档到文档中心。',
+        fields:['文档编号','文档名称','文档类型','文件格式','关联项目','关联客户','上传人','上传时间','版本号','业务来源'],
+        rules:['自动归档,无需人工','业务来源标记为"自动归档"','关联项目/客户/合同自动带入'],
+        upstream:'review', downstream:'tag' },
+      { id:'tag', name:'标签自动打', section:'6.2', domain:'knowledge',
+        desc:'根据来源自动打项目/客户/年份/类型标签。',
+        fields:['项目名称标签','客户名称标签','年份标签','文件类型标签','自定义标签'],
+        rules:['系统标签自动打','自定义标签手工打','支持"且/或"组合检索'],
+        upstream:'archive', downstream:'index' },
+      { id:'index', name:'全文索引', section:'6.4', domain:'knowledge',
+        desc:'建立全文索引,支持内容搜索。',
+        fields:['文档名','标签','上传人','文档内容'],
+        rules:['索引由后端建立','前端只负责搜索调用'],
+        upstream:'tag', downstream:'use' },
+      { id:'use', name:'检索 / 预览 / 复用', section:'6.3 / 6.4 / 6.5', domain:'knowledge',
+        desc:'投标复用、培训参考、年检调阅,带权限控制。',
+        fields:['全文搜索框','高级搜索','相关度排序','命中片段','在线预览','权限范围'],
+        rules:['结果受权限范围过滤','预览不暴露下载链接','权限:公开/项目内/指定人员/私有'],
+        upstream:'index', downstream:null, isEnd:true }
+    ]
+  },
+
+  talent: {
+    name: '主线四:招聘 → 投标',
+    label: '人才主线',
+    color: DOMAIN_COLOR.hr,
+    description: '把招聘、人才档案、简历生成串成一条主线,服务于投标场景的人才需求。员工档案是个人主数据,所有项目角色、证书、简历生成都引用之。',
+    nodes: [
+      { id:'mail', name:'招聘邮箱抓取', section:'7.1', domain:'hr',
+        desc:'自动读取招聘邮箱,生成候选人占位记录。',
+        fields:['候选人姓名','邮箱','应聘岗位','简历附件','邮件来源','抓取时间','HR 处理状态'],
+        rules:['邮箱接入由后端实现','抓取失败不阻塞,HR 可手动新增','首版可降级为"邮件通知+手动登记"'],
+        upstream:null, downstream:'candidate' },
+      { id:'candidate', name:'候选人才库', section:'7.2', domain:'hr',
+        desc:'管理候选人从筛选到录用/淘汰的全过程。',
+        fields:['候选人编号','姓名','性别','电话/邮箱','应聘岗位','学历','工作年限','简历附件','招聘阶段','录用岗位/薪资','入职日期','淘汰原因'],
+        rules:['阶段机:简历筛选→初试→复试→终试→录用/淘汰','录用自动创建人才档案','淘汰保留入库可复活'],
+        upstream:'mail', downstream:'interview' },
+      { id:'interview', name:'面试评估', section:'7.2', domain:'hr',
+        desc:'每阶段记录评估意见与面试官。',
+        fields:['招聘阶段','面试官','评估意见','评估结果'],
+        rules:['每个阶段独立评估','评估记录保留审计'],
+        upstream:'candidate', downstream:'hire' },
+      { id:'hire', name:'录用 → 创建人才档案', section:'7.3', domain:'hr',
+        desc:'录用后自动创建员工档案,作为个人主数据。',
+        fields:['员工编号','姓名','部门','岗位','入职日期','学历/专业','联系方式','技能标签'],
+        rules:['员工档案是个人主数据','离职后档案保留标记"已离职"','所有项目角色/证书/简历都引用之'],
+        upstream:'interview', downstream:'profile' },
+      { id:'profile', name:'人才档案 + 证书', section:'7.3 / 7.4', domain:'hr',
+        desc:'维护技能标签、证书、项目经历(反查)。',
+        fields:['技能标签','证书(子表)','项目经历(只读)','工时统计(只读)','简历版本(子表)'],
+        rules:['证书临期 60 天自动提醒','项目经历自动从项目角色反查','工时自动从任务工作量汇总'],
+        upstream:'hire', downstream:'resume' },
+      { id:'resume', name:'简历生成', section:'7.5', domain:'hr',
+        desc:'按投标模板从人才档案自动生成简历。',
+        fields:['简历模板','姓名','学历','工作年限','技能标签','项目经历','证书列表','生成版本'],
+        rules:['保密项目可勾选不展示','模板由管理员维护','支持 Word/PDF 导出'],
+        upstream:'profile', downstream:'tender' },
+      { id:'tender', name:'投标文件附件', section:'3.2', domain:'sale',
+        desc:'生成的简历作为投标文件附件。',
+        fields:['关联投标','简历附件','投标文件'],
+        rules:['简历版本与投标文件关联','便于后续投标复用'],
+        upstream:'resume', downstream:null, isEnd:true }
+    ]
+  },
+
+  collab: {
+    name: '横向:协同与预警',
+    label: '贯穿主轴',
+    color: DOMAIN_COLOR.collab,
+    description: '协同办公与预警机制横向贯穿销售、项目两大主线。协同办公复用现有工作流引擎(flow + work 模块),不重写审批流;预警机制汇集任务、里程碑、整改、回款四类对象的逾期信息,集中提醒。',
+    nodes: [
+      { id:'flow', name:'工作流引擎(复用)', section:'flow / work', domain:'collab',
+        desc:'现有 src/views/flow/ + src/views/work/,提供流程部署/跟进/待办/已办/发起。',
+        fields:['流程定义','待办','已办','抄送','发起入口'],
+        rules:['复用现有引擎不重写','前端只透传流程数据'],
+        upstream:null, downstream:'seal' },
+      { id:'seal', name:'用印申请', section:'8.2', domain:'collab',
+        desc:'合同审批通过后,合同详情页直接发起用印申请。',
+        fields:['用印类型','用印用途','用印次数','合同附件份数'],
+        rules:['默认 1 正本+N 副本','用印由印章管理员执行'],
+        upstream:'flow', downstream:'invoice' },
+      { id:'invoice', name:'开票申请', section:'8.3', domain:'collab',
+        desc:'与回款流程联动,客户付款前发起开票。',
+        fields:['关联合同','关联回款计划节点','开票金额','发票类型','发票抬头','税号','开票内容','邮寄地址'],
+        rules:['回款详情页"申请开票"按钮预填','审批通过后由财务开票'],
+        upstream:'seal', downstream:'travel' },
+      { id:'travel', name:'差旅申请', section:'8.4', domain:'collab',
+        desc:'项目成员出差前发起审批,关联项目归集费用。',
+        fields:['关联项目','出差人','出差事由','出差地点','起止日期','预计费用','行程明细'],
+        rules:['必须关联项目(决定费用归集)','与项目费用打通'],
+        upstream:'invoice', downstream:'reimburse' },
+      { id:'reimburse', name:'差旅报销', section:'8.4', domain:'collab',
+        desc:'报销审批通过后,费用自动归集到项目费用。',
+        fields:['关联差旅申请','关联项目','报销明细','报销金额','发票附件','审批状态'],
+        rules:['通过后自动写入项目费用','发票附件必传'],
+        upstream:'travel', downstream:'alert' },
+      { id:'alert', name:'逾期预警中心', section:'5.4', domain:'quality',
+        desc:'汇集任务/里程碑/整改/回款 四类预警。',
+        fields:['预警类型','预警对象','责任人','计划日期','实际日期','预警级别(临期/已逾期)','处理计划'],
+        rules:['预警级别:临期(未来 3 天)/ 已逾期','支持消息中心/邮件/钉钉多通道','责任人可"确认预警"并填处理计划'],
+        upstream:'reimburse', downstream:'bi' },
+      { id:'bi', name:'BI 驾驶舱', section:'9.1 - 9.4', domain:'bi',
+        desc:'销售/项目/人员/经营 四驾驶舱,汇总各主线数据。',
+        fields:['销售驾驶舱(商机数/中标率/签约额/回款)','项目驾驶舱(进度/质量)','人员驾驶舱(利用率/参与)','经营驾驶舱(工时·人天)'],
+        rules:['数据依赖各主线完整链路','标注"待确认",数据齐备后上线'],
+        upstream:'alert', downstream:null, isEnd:true }
+    ]
+  }
+};
+
+/* ============ 渲染 ============ */
+const arrowSVG = `<svg viewBox="0 0 36 14" xmlns="http://www.w3.org/2000/svg">
+  <line x1="0" y1="7" x2="28" y2="7" stroke="#bfbfbf" stroke-width="2" stroke-dasharray="3,3"/>
+  <polygon points="28,2 36,7 28,12" fill="#1890ff"/>
+</svg>`;
+
+function renderIntro(key) {
+  const p = PIPELINES[key];
+  document.getElementById('intro-container').innerHTML = `
+    <div class="pipeline-intro" style="border-left-color:${p.color}">
+      <h2><span class="dot" style="background:${p.color};width:10px;height:10px;border-radius:50%;display:inline-block"></span>${p.name}<span style="font-size:12px;color:#999;font-weight:normal;margin-left:8px">(${p.label})</span></h2>
+      <p>${p.description}</p>
+    </div>
+  `;
+}
+
+function renderPipeline(key) {
+  const p = PIPELINES[key];
+  const nodes = p.nodes;
+  let html = `<div class="pipeline active" id="pipe-${key}">`;
+  nodes.forEach((n, i) => {
+    const color = DOMAIN_COLOR[n.domain];
+    const cls = ['node'];
+    if (i === 0) cls.push('start');
+    if (n.isEnd) cls.push('end');
+    if (n.isDecision) cls.push('decision');
+    html += `<div class="${cls.join(' ')}" style="--node-color:${color}" data-pipe="${key}" data-node="${n.id}">
+      <div class="node-head">
+        <span class="node-name">${n.name}</span>
+        <span class="node-section">${n.section}</span>
+      </div>
+      <div class="node-domain">${DOMAIN_LABEL[n.domain]}</div>
+      <div class="node-desc">${n.desc}</div>
+      <div class="node-cta">点击查看字段与规则 →</div>
+    </div>`;
+    if (i < nodes.length - 1) {
+      const next = nodes[i+1];
+      const label = next.upstream === n.id ? '' : (next.upstream ? '回路' : '');
+      html += `<div class="arrow"><div class="arrow-label">${label}</div>${arrowSVG}</div>`;
+    }
+  });
+  html += `</div>`;
+  return html;
+}
+
+function renderAll() {
+  const container = document.getElementById('pipelines-container');
+  let html = '';
+  Object.keys(PIPELINES).forEach((key, i) => {
+    html += `<div class="pipeline-wrap" data-wrap="${key}" style="${i===0?'':'display:none'}">${renderPipeline(key)}</div>`;
+  });
+  container.innerHTML = html;
+}
+
+/* ============ 详情抽屉 ============ */
+function openDrawer(pipeKey, nodeId) {
+  const p = PIPELINES[pipeKey];
+  const node = p.nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  const color = DOMAIN_COLOR[node.domain];
+
+  document.getElementById('dhDomain').textContent = DOMAIN_LABEL[node.domain] + ' · ' + p.label;
+  document.getElementById('dhName').textContent = node.name;
+  document.getElementById('dhSection').textContent = '对应文档章节:' + node.section;
+  document.querySelector('.drawer-head').style.background = color + '14';
+
+  const fieldsHtml = node.fields.map(f => `<li>${f}</li>`).join('');
+  const rulesHtml = node.rules.map(r => `<li>${r}</li>`).join('');
+
+  const findName = (id) => id ? (p.nodes.find(n => n.id === id)?.name || '—') : '—';
+  const upDownHtml = `
+    <div class="ud-card">
+      <div class="ud-label">⬆ 上游(触发来源)</div>
+      <div class="ud-name">${findName(node.upstream)}</div>
+    </div>
+    <div class="ud-card">
+      <div class="ud-label">⬇ 下游(流转去向)</div>
+      <div class="ud-name">${findName(node.downstream)}</div>
+    </div>`;
+
+  document.getElementById('drawerBody').innerHTML = `
+    <section>
+      <h4>功能描述</h4>
+      <p>${node.desc}</p>
+    </section>
+    <section>
+      <h4>关键业务字段</h4>
+      <ul class="field-list">${fieldsHtml}</ul>
+    </section>
+    <section>
+      <h4>关键规则</h4>
+      <ul class="rule-list">${rulesHtml}</ul>
+    </section>
+    <section>
+      <h4>业务流转</h4>
+      <div class="upstream-downstream">${upDownHtml}</div>
+    </section>
+    <section>
+      <h4>所属主线</h4>
+      <p>${p.name} (${p.label})</p>
+    </section>
+  `;
+
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerMask').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerMask').classList.remove('open');
+}
+
+/* ============ Tab 切换 ============ */
+function switchTab(key) {
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.pipe === key);
+  });
+  document.querySelectorAll('[data-wrap]').forEach(w => {
+    w.style.display = w.dataset.wrap === key ? '' : 'none';
+  });
+  renderIntro(key);
+}
+
+/* ============ 事件绑定 ============ */
+document.addEventListener('DOMContentLoaded', () => {
+  renderAll();
+  renderIntro('sales');
+
+  document.getElementById('tabs').addEventListener('click', e => {
+    const tab = e.target.closest('.tab');
+    if (tab) switchTab(tab.dataset.pipe);
+  });
+
+  document.getElementById('pipelines-container').addEventListener('click', e => {
+    const node = e.target.closest('.node');
+    if (node) openDrawer(node.dataset.pipe, node.dataset.node);
+  });
+
+  document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+  document.getElementById('drawerMask').addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+  const demoLink = document.getElementById('demo-entry-link');
+  if (demoLink && location.port === '2889') {
+    demoLink.href = '/#/poms/phase1/index';
+  }
+});
+</script>
+
+</body>
+</html>
