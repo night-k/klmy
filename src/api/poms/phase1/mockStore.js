@@ -545,9 +545,7 @@ function createSeedData() {
         contractAmount: 880000,
         signDate: '2024-05-28',
         contractStatus: 'completed',
-        paymentPlans: [
-          { node: 'prepay', ratio: 100, amount: 880000, planDate: '2024-06-15' },
-        ],
+        paymentPlans: [{ node: 'prepay', ratio: 100, amount: 880000, planDate: '2024-06-15' }],
         projectId: project4Id,
         contractFiles: [],
         createTime: '2024-05-25 14:00:00',
@@ -568,9 +566,7 @@ function createSeedData() {
         contractAmount: 420000,
         signDate: '2023-02-25',
         contractStatus: 'terminated',
-        paymentPlans: [
-          { node: 'prepay', ratio: 100, amount: 420000, planDate: '2023-03-15' },
-        ],
+        paymentPlans: [{ node: 'prepay', ratio: 100, amount: 420000, planDate: '2023-03-15' }],
         projectId: project5Id,
         contractFiles: [],
         createTime: '2023-02-20 10:00:00',
@@ -1032,7 +1028,7 @@ export function createCrudApi(collectionKey) {
 export function syncContractPayments(contract) {
   const s = loadStore();
   s.payments = s.payments.filter(p => p.contractId !== contract.id);
-  (contract.paymentPlans || []).forEach((plan, idx) => {
+  (contract.paymentPlans || []).forEach(plan => {
     const planDate = plan.planDate || '';
     let status = 'not_due';
     if (planDate && planDate < today()) status = 'overdue';
@@ -1104,7 +1100,33 @@ export function createContractFromWinbid(winbidId) {
 export function createProjectFromContract(contractId, formData) {
   const s = loadStore();
   const contract = s.contracts.find(c => c.id === contractId);
-  if (!contract) return mockResponse(null);
+  if (!contract) {
+    const project = {
+      id: genId('project'),
+      code: genCode('project'),
+      projectName: formData.projectName,
+      contractId: '',
+      contractCode: '',
+      customerId: '',
+      customerName: formData.customerName || '手工客户',
+      cooperationType: formData.cooperationType || 'self',
+      partnerCompany: formData.partnerCompany || '',
+      serviceType: formData.serviceType || 'tech_service',
+      projectManagerId: formData.projectManagerId || 'u001',
+      projectManagerName: formData.projectManagerName || '张明',
+      budget: formData.budget || 0,
+      planStartDate: formData.planStartDate || today(),
+      planEndDate: formData.planEndDate || today(),
+      status: 'pending_proposal',
+      description: formData.description || '',
+      attachments: formData.attachments || { technicalFiles: [], qualificationFiles: [], otherFiles: [] },
+      createTime: now(),
+      sourceType: 'manual',
+    };
+    s.projects.unshift(project);
+    saveStore();
+    return mockResponse(project);
+  }
   if (contract.projectId) {
     const existing = s.projects.find(p => p.id === contract.projectId);
     return mockResponse(existing);
@@ -1127,6 +1149,7 @@ export function createProjectFromContract(contractId, formData) {
     planEndDate: formData.planEndDate || contract.serviceEndDate,
     status: 'pending_proposal',
     description: formData.description || '',
+    attachments: formData.attachments || { technicalFiles: [], qualificationFiles: [], otherFiles: [] },
     createTime: now(),
   };
   s.projects.unshift(project);
@@ -1154,9 +1177,7 @@ export function getPaymentStatistics(scope = {}) {
   const contractAmount = contracts.reduce((sum, c) => sum + (Number(c.contractAmount) || 0), 0);
   const contractReceived = payments.reduce((sum, p) => sum + (Number(p.actualAmount) || 0), 0);
   const contractPending = contractAmount - contractReceived;
-  const contractExpected = payments
-    .filter(p => p.status === 'overdue')
-    .reduce((sum, p) => sum + (Number(p.planAmount) - Number(p.actualAmount || 0)), 0);
+  const contractExpected = payments.filter(p => p.status === 'overdue').reduce((sum, p) => sum + (Number(p.planAmount) - Number(p.actualAmount || 0)), 0);
   return {
     contractTotal: contracts.length,
     contractAmount,
@@ -1237,9 +1258,7 @@ function calcContractPaymentStatus(nodes) {
 }
 
 function buildContractPaymentRow(contract, payments) {
-  const nodes = payments
-    .map(p => ({ ...p, status: calcPaymentStatus(p) }))
-    .sort((a, b) => (a.createTime || '').localeCompare(b.createTime || ''));
+  const nodes = payments.map(p => ({ ...p, status: calcPaymentStatus(p) })).sort((a, b) => (a.createTime || '').localeCompare(b.createTime || ''));
   const planTotal = nodes.reduce((sum, p) => sum + (Number(p.planAmount) || 0), 0);
   const receivedTotal = nodes.reduce((sum, p) => sum + (Number(p.actualAmount) || 0), 0);
   const contractId = contract?.id || nodes[0]?.contractId;
