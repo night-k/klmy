@@ -4,7 +4,10 @@
       <template #header>
         <div class="card-header">
           <span>销售主线业务流程</span>
-          <el-button type="warning" plain size="small" @click="handleReset">重置演示数据</el-button>
+          <div class="card-header-actions">
+            <el-button type="success" plain size="small" @click="goProject">项目主线</el-button>
+            <el-button type="warning" plain size="small" @click="handleReset">重置演示数据</el-button>
+          </div>
         </div>
       </template>
       <el-steps :active="6" align-center finish-status="success" class="flow-steps">
@@ -78,16 +81,13 @@ export default {
     },
     go(path) {
       if (path === '/poms/phase1/project-init') {
-        this.showProjectDeveloping();
+        this.goProject();
         return;
       }
       this.$router.push(path);
     },
-    showProjectDeveloping() {
-      this.$alert('项目列表页面开发中', '提示', {
-        confirmButtonText: '知道了',
-        type: 'info',
-      });
+    goProject() {
+      this.$router.push('/poms/phase2/index');
     },
     handleReset() {
       this.$confirm('确定重置为初始演示数据？', '提示', { type: 'warning' }).then(() => {
@@ -109,6 +109,12 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .flow-steps {

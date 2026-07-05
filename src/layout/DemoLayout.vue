@@ -18,7 +18,10 @@
     <el-container>
       <el-header class="demo-layout__header" height="56px">
         <span class="demo-layout__header-title">{{ currentTitle }}</span>
-        <el-tag type="info" effect="plain" size="small">Mock 演示 · 数据存于浏览器</el-tag>
+        <div class="demo-layout__header-actions">
+          <el-tag type="info" effect="plain" size="small">Mock 演示 · 数据存于浏览器</el-tag>
+          <el-button type="success" plain size="small" @click="goProject">项目主线</el-button>
+        </div>
       </el-header>
       <el-main class="demo-layout__main">
         <router-view v-slot="{ Component }">
@@ -53,6 +56,11 @@ export default {
     },
     currentTitle() {
       return this.$route.meta?.title || '销售管理演示';
+    },
+  },
+  methods: {
+    goProject() {
+      this.$router.push('/poms/phase2/index');
     },
   },
 };
@@ -102,6 +110,12 @@ export default {
     font-size: 16px;
     font-weight: 500;
     color: #303133;
+  }
+
+  &__header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 
   &__main {

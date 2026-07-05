@@ -162,16 +162,10 @@ export default {
     },
     goProjectInit() {
       this.viewVisible = false;
-      this.showProjectDeveloping();
+      this.$router.push('/poms/phase2/projectList');
     },
     goProjectList() {
-      this.showProjectDeveloping();
-    },
-    showProjectDeveloping() {
-      this.$alert('项目列表页面开发中', '提示', {
-        confirmButtonText: '知道了',
-        type: 'info',
-      });
+      this.$router.push('/poms/phase2/projectList');
     },
     goPayment(row) {
       this.viewVisible = false;
