@@ -65,6 +65,29 @@
     white-space: nowrap;
   }
 
+  .demo-entry-btn--project {
+    color: #531dab;
+  }
+
+  .demo-entry-btn--knowledge {
+    color: #237804;
+  }
+
+  .header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .topbar-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
   .demo-entry-btn:hover {
     color: #003a8c;
     transform: translateY(-1px);
@@ -450,8 +473,14 @@
 <body>
 
 <header class="topbar">
-  <h1>POMS 石油服务运营管理系统 · 主线流程总览</h1>
-  <a id="demo-entry-link" class="demo-entry-btn" href="./demo/index.html#/poms/phase1/index">进入销售 Mock 演示 →</a>
+  <div class="topbar-head">
+    <h1>POMS 石油服务运营管理系统 · 主线流程总览</h1>
+    <div class="header-actions">
+      <a id="demo-entry-link" class="demo-entry-btn" href="./demo/index.html#/poms/phase1/index">进入销售 Mock 演示 →</a>
+      <a id="demo-project-link" class="demo-entry-btn demo-entry-btn--project" href="./demo/index.html#/poms/phase2/index">进入项目主线 Mock →</a>
+      <a id="demo-knowledge-link" class="demo-entry-btn demo-entry-btn--knowledge" href="./demo/index.html#/poms/phase3/index">进入知识主线 Mock →</a>
+    </div>
+  </div>
 </header>
 
 <nav class="tabs" id="tabs">
@@ -916,8 +945,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 
   const demoLink = document.getElementById('demo-entry-link');
+  const projectLink = document.getElementById('demo-project-link');
+  const knowledgeLink = document.getElementById('demo-knowledge-link');
   if (demoLink && location.port === '2889') {
     demoLink.href = '/#/poms/phase1/index';
+    if (projectLink) projectLink.href = '/#/poms/phase2/index';
+    if (knowledgeLink) knowledgeLink.href = '/#/poms/phase3/index';
   }
 });
 </script>

@@ -1,0 +1,19 @@
+/* POMS 演示页：避免 el-card / avue-crud 截断滚动 */
+.poms-demo-main {
+  .basic-container {
+    padding-bottom: 16px;
+  }
+
+  .basic-container__card,
+  .el-card__body {
+    overflow: visible;
+  }
+
+  .avue-crud__body .el-card__body {
+    overflow-x: auto;
+  }
+
+  .el-table {
+    overflow-x: auto;
+  }
+}

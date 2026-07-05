@@ -1,0 +1,20 @@
+export const Option = () => ({
+  border: true,
+  index: true,
+  addBtn: false,
+  editBtn: false,
+  delBtn: false,
+  viewBtn: false,
+  searchSpan: 6,
+  searchMenuSpan: 6,
+  overHidden: true,
+  column: [
+    { label: '项目编号', prop: 'projectCode', search: true, minWidth: 140 },
+    { label: '项目名称', prop: 'projectName', search: true, minWidth: 160 },
+    { label: '成果物名称', prop: 'name', minWidth: 180 },
+    { label: '版本', prop: 'version', width: 80 },
+    { label: '审核状态', prop: 'auditStatus', minWidth: 100 },
+    { label: '上传人', prop: 'uploaderName', width: 90 },
+    { label: '上传时间', prop: 'uploadTime', minWidth: 160 },
+  ],
+});

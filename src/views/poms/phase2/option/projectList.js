@@ -1,0 +1,20 @@
+export const ListOption = () => ({
+  border: true,
+  index: true,
+  addBtn: false,
+  editBtn: false,
+  delBtn: false,
+  viewBtn: false,
+  menuWidth: 120,
+  column: [
+    { label: '项目编号', prop: 'code', minWidth: 140, slot: true },
+    { label: '项目名称', prop: 'projectName', minWidth: 180, search: true },
+    { label: '客户名称', prop: 'customName', minWidth: 160, search: true },
+    { label: '合同编号', prop: 'contractCode', minWidth: 130 },
+    { label: '合作类型', prop: 'cooperationType', minWidth: 90, slot: true },
+    { label: '项目经理', prop: 'projectManagerName', minWidth: 100 },
+    { label: '合同金额', prop: 'projectAmount', minWidth: 120, slot: true },
+    { label: '计划完成', prop: 'deliveryDate', minWidth: 110 },
+    { label: '状态', prop: 'pomsStatus', minWidth: 100, slot: true },
+  ],
+});
