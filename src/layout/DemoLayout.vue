@@ -21,6 +21,7 @@
         <div class="demo-layout__header-actions">
           <el-tag type="info" effect="plain" size="small">Mock 演示 · 数据存于浏览器</el-tag>
           <el-button type="success" plain size="small" @click="goProject">项目主线</el-button>
+          <el-button type="warning" plain size="small" @click="goTalent">人才主线</el-button>
         </div>
       </el-header>
       <el-main class="demo-layout__main">
@@ -61,6 +62,9 @@ export default {
   methods: {
     goProject() {
       this.$router.push('/poms/phase2/index');
+    },
+    goTalent() {
+      this.$router.push('/poms/phase4/index');
     },
   },
 };

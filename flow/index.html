@@ -77,6 +77,11 @@
     color: #d46b08;
   }
 
+  .intro-mock-btn {
+    display: inline-flex;
+    margin-top: 14px;
+  }
+
   .header-actions {
     display: flex;
     flex-wrap: wrap;
@@ -815,10 +820,15 @@ const arrowSVG = `<svg viewBox="0 0 36 14" xmlns="http://www.w3.org/2000/svg">
 
 function renderIntro(key) {
   const p = PIPELINES[key];
+  const mockRoute = MOCK_ROUTES[key];
+  const mockBtn = mockRoute
+    ? `<a class="demo-entry-btn intro-mock-btn" href="${resolveDemoUrl(mockRoute)}">进入${p.label} Mock 演示 →</a>`
+    : '';
   document.getElementById('intro-container').innerHTML = `
     <div class="pipeline-intro" style="border-left-color:${p.color}">
       <h2><span class="dot" style="background:${p.color};width:10px;height:10px;border-radius:50%;display:inline-block"></span>${p.name}<span style="font-size:12px;color:#999;font-weight:normal;margin-left:8px">(${p.label})</span></h2>
       <p>${p.description}</p>
+      ${mockBtn}
     </div>
   `;
 }
@@ -919,6 +929,39 @@ function closeDrawer() {
   document.getElementById('drawerMask').classList.remove('open');
 }
 
+/* ============ Mock 演示入口（GitHub Pages 需绝对路径） ============ */
+const MOCK_ROUTES = {
+  sales: '/poms/phase1/index',
+  project: '/poms/phase2/index',
+  knowledge: '/poms/phase3/index',
+  talent: '/poms/phase4/index',
+};
+
+function resolveDemoUrl(route) {
+  const hash = route.startsWith('#') ? route : `#${route}`;
+  if (location.hostname.endsWith('github.io')) {
+    const repo = location.pathname.split('/').filter(Boolean)[0] || 'klmy';
+    return `${location.origin}/${repo}/demo/index.html${hash}`;
+  }
+  if (location.port === '2889') {
+    return `${location.origin}/${hash.replace(/^#/, '')}`;
+  }
+  return `./demo/index.html${hash}`;
+}
+
+function applyDemoLinks() {
+  const map = {
+    'demo-entry-link': MOCK_ROUTES.sales,
+    'demo-project-link': MOCK_ROUTES.project,
+    'demo-knowledge-link': MOCK_ROUTES.knowledge,
+    'demo-talent-link': MOCK_ROUTES.talent,
+  };
+  Object.entries(map).forEach(([id, route]) => {
+    const el = document.getElementById(id);
+    if (el) el.href = resolveDemoUrl(route);
+  });
+}
+
 /* ============ Tab 切换 ============ */
 function switchTab(key) {
   document.querySelectorAll('.tab').forEach(t => {
@@ -932,6 +975,7 @@ function switchTab(key) {
 
 /* ============ 事件绑定 ============ */
 document.addEventListener('DOMContentLoaded', () => {
+  applyDemoLinks();
   renderAll();
   renderIntro('sales');
 
@@ -948,17 +992,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('drawerClose').addEventListener('click', closeDrawer);
   document.getElementById('drawerMask').addEventListener('click', closeDrawer);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
-
-  const demoLink = document.getElementById('demo-entry-link');
-  const projectLink = document.getElementById('demo-project-link');
-  const knowledgeLink = document.getElementById('demo-knowledge-link');
-  const talentLink = document.getElementById('demo-talent-link');
-  if (demoLink && location.port === '2889') {
-    demoLink.href = '/#/poms/phase1/index';
-    if (projectLink) projectLink.href = '/#/poms/phase2/index';
-    if (knowledgeLink) knowledgeLink.href = '/#/poms/phase3/index';
-    if (talentLink) talentLink.href = '/#/poms/phase4/index';
-  }
 });
 </script>
 

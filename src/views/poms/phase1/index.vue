@@ -6,6 +6,7 @@
           <span>销售主线业务流程</span>
           <div class="card-header-actions">
             <el-button type="success" plain size="small" @click="goProject">项目主线</el-button>
+            <el-button type="warning" plain size="small" @click="goTalent">人才主线</el-button>
             <el-button type="warning" plain size="small" @click="handleReset">重置演示数据</el-button>
           </div>
         </div>
@@ -88,6 +89,9 @@ export default {
     },
     goProject() {
       this.$router.push('/poms/phase2/index');
+    },
+    goTalent() {
+      this.$router.push('/poms/phase4/index');
     },
     handleReset() {
       this.$confirm('确定重置为初始演示数据？', '提示', { type: 'warning' }).then(() => {
