@@ -1,6 +1,5 @@
 <template>
   <basic-container v-loading="loading" class="poms-project-space">
-    <flow-step-nav v-if="currentProjectId" flow-key="attributes" :project-id="currentProjectId" :project-detail="projectObj" class="space-flow-nav" />
     <div v-if="projectObj.id" class="project-space-page">
       <div v-if="!hideBreadcrumb" class="space-toolbar">
         <div class="space-breadcrumb">
@@ -153,7 +152,6 @@ import { revokeMilestone } from '@/api/poms/phase2/milestone';
 import ModuleShortcuts from '../components/ModuleShortcuts.vue';
 import MilestonePanel from '../components/MilestonePanel.vue';
 import AcceptanceTab from '../components/tabs/AcceptanceTab.vue';
-import FlowStepNav from '../components/FlowStepNav.vue';
 import ProjectSpaceHeader from './ProjectSpaceHeader.vue';
 import ProjectSpaceTabs from './ProjectSpaceTabs.vue';
 import { isProposalApproved, canAccept } from '../utils/projectFlow';
@@ -165,7 +163,6 @@ export default {
     ModuleShortcuts,
     MilestonePanel,
     AcceptanceTab,
-    FlowStepNav,
     ProjectSpaceHeader,
     ProjectSpaceTabs,
     UploadFilled,
@@ -415,9 +412,6 @@ export default {
 @import './projectSpace.scss';
 
 .poms-project-space {
-  .space-flow-nav {
-    margin-bottom: 16px;
-  }
   .attr-form {
     max-width: 640px;
     margin-top: 12px;

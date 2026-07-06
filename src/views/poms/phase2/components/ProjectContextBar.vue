@@ -12,7 +12,6 @@
       </el-select>
       <el-button v-if="projectId" type="primary" plain @click="goSpace">进入项目空间</el-button>
     </div>
-    <flow-step-nav v-if="flowKey" :flow-key="flowKey" :project-id="projectId" :project-detail="projectDetail" />
     <el-alert v-if="guardMessage" :title="guardMessage" type="warning" show-icon :closable="false" class="guard-alert" />
   </div>
 </template>
@@ -20,11 +19,9 @@
 <script>
 import { getPage, getDetail } from '@/api/poms/phase2/projectAdapter';
 import { getGuardMessage, getStepByKey } from '../utils/projectFlow';
-import FlowStepNav from './FlowStepNav.vue';
 
 export default {
   name: 'ProjectContextBar',
-  components: { FlowStepNav },
   props: {
     projectId: { type: String, default: '' },
     moduleName: { type: String, default: '' },
