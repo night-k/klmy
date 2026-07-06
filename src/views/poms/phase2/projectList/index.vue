@@ -22,7 +22,6 @@
     </el-form>
 
     <div class="page-button">
-      <el-alert type="info" show-icon :closable="false" title="项目优先由合同审批完成后自动立项，也可手工新增项目" />
       <div class="view-switch">
         <el-button size="small" type="primary" plain @click="openManualInit">手工新增项目</el-button>
         <el-button size="small" plain @click="$router.push('/poms/phase1/contract')">前往合同管理</el-button>
@@ -59,7 +58,7 @@
             <el-button type="primary" class="project-space" @click="rowProjectSpace(item)"> 进入项目空间 </el-button>
           </el-card>
         </div>
-        <el-empty v-else description="暂无项目，请从合同管理发起立项" />
+        <el-empty v-else description="暂无项目" />
       </div>
       <el-pagination v-model:current-page="page.currentPage" :page-size="page.pageSize" background layout="total, prev, pager, next" :total="page.total" @current-change="currentChange" />
     </div>
@@ -181,10 +180,22 @@ export default {
 }
 .page-button {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-bottom: 16px;
   gap: 12px;
+  flex-wrap: wrap;
+}
+.view-switch {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  :deep(.el-button + .el-button) {
+    margin-left: 0;
+  }
 }
 .project-card-list {
   display: grid;

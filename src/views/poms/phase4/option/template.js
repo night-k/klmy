@@ -1,0 +1,37 @@
+import { TEMPLATE_STATUS, TEMPLATE_TYPE } from './dict';
+
+export const Option = () => ({
+  border: true,
+  index: true,
+  viewBtn: false,
+  editBtn: true,
+  delBtn: true,
+  addBtn: true,
+  dialogType: 'drawer',
+  dialogWidth: 780,
+  dialogClickModal: false,
+  searchSpan: 6,
+  searchMenuSpan: 6,
+  searchLabelWidth: 100,
+  labelWidth: 110,
+  overHidden: true,
+  column: [
+    { label: '模板编号', prop: 'code', addDisplay: false, editDisplay: false, search: true, minWidth: 140 },
+    { label: '模板名称', prop: 'name', search: true, rules: [{ required: true, message: '请输入模板名称', trigger: 'blur' }], minWidth: 180 },
+    { label: '模板类型', prop: 'type', type: 'select', dicData: TEMPLATE_TYPE, rules: [{ required: true, message: '请选择类型', trigger: 'change' }], minWidth: 110 },
+    { label: '状态', prop: 'status', type: 'select', dicData: TEMPLATE_STATUS, minWidth: 90 },
+    { label: '文件名', prop: 'fileName', addDisplay: false, editDisplay: false, minWidth: 180 },
+    { label: '使用次数', prop: 'usageCount', addDisplay: false, editDisplay: false, minWidth: 90 },
+    { label: '说明', prop: 'description', hide: true, span: 24, type: 'textarea' },
+    {
+      label: '模板文件',
+      prop: 'templateFiles',
+      formslot: true,
+      hide: true,
+      span: 24,
+      addDisplay: true,
+      editDisplay: true,
+    },
+    { label: '创建时间', prop: 'createTime', addDisplay: false, editDisplay: false, minWidth: 160 },
+  ],
+});

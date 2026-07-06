@@ -1,13 +1,5 @@
 <template>
-  <el-drawer
-    v-model="visible"
-    :title="null"
-    size="860px"
-    append-to-body
-    destroy-on-close
-    class="payment-view-drawer"
-    @closed="$emit('closed')"
-  >
+  <el-drawer v-model="visible" :title="null" size="860px" append-to-body destroy-on-close class="payment-view-drawer" @closed="$emit('closed')">
     <div v-if="detail" v-loading="loading" class="payment-view">
       <div class="payment-view__hero">
         <div class="payment-view__hero-main">
@@ -38,14 +30,8 @@
           <span>合同回款进度</span>
           <span>{{ receivePercent }}%</span>
         </div>
-        <el-progress
-          :percentage="receivePercent"
-          :status="receivePercent >= 100 ? 'success' : detail.status === 'overdue' ? 'exception' : undefined"
-          :stroke-width="10"
-        />
-        <div v-if="remainAmount > 0" class="payment-view__remain">
-          待收 ¥ {{ formatAmount(remainAmount) }}
-        </div>
+        <el-progress :percentage="receivePercent" :status="receivePercent >= 100 ? 'success' : detail.status === 'overdue' ? 'exception' : undefined" :stroke-width="10" />
+        <div v-if="remainAmount > 0" class="payment-view__remain">待收 ¥ {{ formatAmount(remainAmount) }}</div>
       </div>
 
       <el-card shadow="never" class="payment-view__section">
@@ -87,14 +73,7 @@
       </el-card>
     </div>
 
-    <el-dialog
-      v-model="nodeDialogVisible"
-      :title="nodeDialogTitle"
-      width="520px"
-      append-to-body
-      destroy-on-close
-      @closed="resetNodeForm"
-    >
+    <el-dialog v-model="nodeDialogVisible" :title="nodeDialogTitle" width="520px" append-to-body destroy-on-close @closed="resetNodeForm">
       <div v-if="editingNode" class="payment-view__node-summary">
         <span>{{ labelOf(PAYMENT_NODE, editingNode.planNode) }}</span>
         <span>计划 ¥ {{ formatAmount(editingNode.planAmount) }}</span>
@@ -102,13 +81,7 @@
       </div>
       <el-form ref="nodeFormRef" :model="nodeForm" :rules="nodeRules" label-width="100px">
         <el-form-item label="实际日期" prop="actualDate">
-          <el-date-picker
-            v-model="nodeForm.actualDate"
-            type="date"
-            value-format="YYYY-MM-DD"
-            placeholder="请选择实际回款日期"
-            style="width: 100%"
-          />
+          <el-date-picker v-model="nodeForm.actualDate" type="date" value-format="YYYY-MM-DD" placeholder="请选择实际回款日期" style="width: 100%" />
         </el-form-item>
         <el-form-item label="实际金额" prop="actualAmount">
           <el-input-number
@@ -143,14 +116,7 @@
 </template>
 
 <script>
-import {
-  PAYMENT_NODE,
-  PAYMENT_METHOD,
-  PAYMENT_STATUS,
-  PAYMENT_STATUS_TAG,
-  INVOICE_STATUS,
-  labelOf,
-} from '../option/dict';
+import { PAYMENT_NODE, PAYMENT_METHOD, PAYMENT_STATUS, PAYMENT_STATUS_TAG, INVOICE_STATUS, labelOf } from '../option/dict';
 
 export default {
   name: 'PaymentViewDrawer',

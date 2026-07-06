@@ -53,7 +53,13 @@
             <el-descriptions :column="2" border>
               <el-descriptions-item label="项目编号">{{ projectObj.code }}</el-descriptions-item>
               <el-descriptions-item label="关联合同">
-                <el-link type="primary" @click="goContract">{{ projectObj.contractCode }}</el-link>
+                <div class="contract-links">
+                  <el-tag v-for="item in projectContracts" :key="item.id" type="primary" effect="plain" class="contract-tag" @click="goContract(item.id)">
+                    {{ item.code }}
+                  </el-tag>
+                  <span v-if="!projectContracts.length">-</span>
+                  <el-button link type="primary" @click="openAttachContract">追加合同</el-button>
+                </div>
               </el-descriptions-item>
               <el-descriptions-item label="客户名称">{{ projectObj.customName }}</el-descriptions-item>
               <el-descriptions-item label="项目经理">{{ projectObj.projectManagerName }}</el-descriptions-item>
@@ -90,40 +96,20 @@
         </div>
 
         <div v-show="activeTab === 'team'" class="tab-pane">
-          <div class="team-toolbar">
-            <el-button type="primary" plain size="small" :disabled="!canEditTeam" @click="addTeamRow">添加成员</el-button>
-            <el-button type="success" size="small" :loading="teamSaving" :disabled="!canEditTeam" @click="saveTeam">保存团队</el-button>
-            <el-alert v-if="!canEditTeam" type="info" show-icon :closable="false" title="当前角色只能查看团队，项目经理可维护项目角色" style="margin-top: 8px" />
-            <el-alert v-if="teamRatioWarn" type="warning" show-icon :closable="false" title="投入比合计超过 100%，请确认是否合理" style="margin-top: 8px" />
-          </div>
           <el-table :data="teamRows" border>
-            <el-table-column label="姓名" min-width="120">
+            <el-table-column label="姓名" min-width="140">
               <template #default="{ row }">
-                <el-select v-model="row.userId" filterable style="width: 100%" :disabled="!canEditTeam" @change="onTeamUserChange(row)">
-                  <el-option v-for="u in MOCK_USERS" :key="u.id" :label="u.name" :value="u.id" />
-                </el-select>
+                {{ row.userName || '-' }}
               </template>
             </el-table-column>
             <el-table-column label="角色" width="140">
               <template #default="{ row }">
-                <el-select v-model="row.roleType" style="width: 100%" :disabled="!canEditTeam">
-                  <el-option v-for="o in ROLE_TYPE" :key="o.value" :label="o.label" :value="o.value" />
-                </el-select>
-              </template>
-            </el-table-column>
-            <el-table-column label="投入%" width="120">
-              <template #default="{ row }">
-                <el-input-number v-model="row.ratio" :min="0" :max="200" size="small" style="width: 100%" :disabled="!canEditTeam" />
+                {{ labelOf(ROLE_TYPE, row.roleType) }}
               </template>
             </el-table-column>
             <el-table-column label="加入日期" width="150">
               <template #default="{ row }">
-                <el-date-picker v-model="row.joinDate" type="date" value-format="YYYY-MM-DD" size="small" style="width: 100%" :disabled="!canEditTeam" />
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" width="80" align="center">
-              <template #default="{ $index }">
-                <el-button link type="danger" :disabled="!canEditTeam" @click="teamRows.splice($index, 1)">移除</el-button>
+                {{ row.joinDate || '-' }}
               </template>
             </el-table-column>
           </el-table>
@@ -133,7 +119,16 @@
         </div>
 
         <div v-show="activeTab === 'files'" class="tab-pane">
-          <p class="files-hint">附件演示区（Mock）</p>
+          <p class="files-hint">项目附件</p>
+          <el-table :data="fileRows" border size="small" style="margin-bottom: 12px">
+            <el-table-column prop="typeName" label="附件类型" width="140" />
+            <el-table-column prop="name" label="文件名称" min-width="220" show-overflow-tooltip />
+            <el-table-column label="操作" width="100" align="center">
+              <template #default>
+                <el-button link type="primary">预览</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
           <el-upload action="#" :auto-upload="false" drag>
             <el-icon class="el-icon--upload"><upload-filled /></el-icon>
             <div>拖拽上传项目附件</div>
@@ -142,12 +137,23 @@
       </div>
     </div>
     <el-empty v-else description="项目不存在" />
+
+    <el-dialog v-model="contractAppendVisible" title="追加关联合同" width="560px" append-to-body>
+      <el-select v-model="appendContractIds" multiple filterable clearable collapse-tags collapse-tags-tooltip placeholder="请选择要关联到当前项目的合同" style="width: 100%">
+        <el-option v-for="item in availableContractOptions" :key="item.id" :label="`${item.code} - ${item.projectName}`" :value="item.id" />
+      </el-select>
+      <template #footer>
+        <el-button @click="contractAppendVisible = false">取消</el-button>
+        <el-button type="primary" :disabled="!appendContractIds.length" @click="submitAttachContract">确认关联</el-button>
+      </template>
+    </el-dialog>
   </basic-container>
 </template>
 
 <script>
-import { COOPERATION_TYPE, SERVICE_TYPE, ROLE_TYPE, MOCK_USERS, labelOf } from '../option/dict';
-import { getPage, getDetail, getTaskStatsApi, finishMilestone, updateProject, finish, saveProjectRoles } from '@/api/poms/phase2/projectAdapter';
+import { COOPERATION_TYPE, SERVICE_TYPE, ROLE_TYPE, labelOf } from '../option/dict';
+import { getPage, getDetail, getTaskStatsApi, finishMilestone, updateProject, finish, attachContracts } from '@/api/poms/phase2/projectAdapter';
+import { loadStore } from '@/api/poms/phase1/mockStore';
 import { revokeMilestone } from '@/api/poms/phase2/milestone';
 import ModuleShortcuts from '../components/ModuleShortcuts.vue';
 import MilestonePanel from '../components/MilestonePanel.vue';
@@ -177,7 +183,6 @@ export default {
       COOPERATION_TYPE,
       SERVICE_TYPE,
       ROLE_TYPE,
-      MOCK_USERS,
       loading: false,
       activeTab: 'basic',
       editingAttrs: false,
@@ -186,8 +191,10 @@ export default {
       taskStats: {},
       quickProjectList: [],
       teamRows: [],
-      teamSaving: false,
       currentRoleType: 'pm',
+      contractAppendVisible: false,
+      appendContractIds: [],
+      contractOptions: [],
     };
   },
   computed: {
@@ -218,10 +225,6 @@ export default {
       const finalOk = tasks.every(t => t.status === 'completed' || t.status === 'cancelled') && milestones.every(m => m.status === 'passed');
       return (interimOk || finalOk) && (canAccept(this.projectObj) || this.projectObj.pomsStatus === 'completed');
     },
-    teamRatioWarn() {
-      const total = this.teamRows.reduce((s, r) => s + (Number(r.ratio) || 0), 0);
-      return total > 100;
-    },
     /**
      * 项目完成门禁：必须存在最终验收通过的记录
      */
@@ -233,9 +236,6 @@ export default {
     canEditProjectAttrs() {
       return this.currentRoleType === 'pm';
     },
-    canEditTeam() {
-      return this.currentRoleType === 'pm';
-    },
     canOperateQuality() {
       return ['pm', 'tech', 'qa'].includes(this.currentRoleType);
     },
@@ -243,6 +243,24 @@ export default {
       return {
         attrs: '当前角色无权限，项目经理可编辑项目属性',
       };
+    },
+    projectContracts() {
+      if (this.projectObj.contracts?.length) return this.projectObj.contracts;
+      if (!this.projectObj.contractId) return [];
+      return [{ id: this.projectObj.contractId, code: this.projectObj.contractCode }];
+    },
+    availableContractOptions() {
+      const linked = new Set(this.projectContracts.map(item => item.id));
+      return this.contractOptions.filter(item => !linked.has(item.id) && (!item.projectId || item.projectId === this.currentProjectId));
+    },
+    fileRows() {
+      const attachments = this.projectObj.attachments || {};
+      const groups = [
+        { key: 'technicalFiles', typeName: '技术文件' },
+        { key: 'qualificationFiles', typeName: '资质文件' },
+        { key: 'otherFiles', typeName: '其他附件' },
+      ];
+      return groups.flatMap(group => (attachments[group.key] || []).map(file => ({ ...file, typeName: group.typeName })));
     },
   },
   watch: {
@@ -263,6 +281,7 @@ export default {
   },
   mounted() {
     this.loadQuickProjects();
+    this.loadContractOptions();
   },
   methods: {
     labelOf,
@@ -273,6 +292,10 @@ export default {
       getPage(1, 20, {}).then(res => {
         this.quickProjectList = res.data.data.records || [];
       });
+    },
+    loadContractOptions() {
+      const s = loadStore();
+      this.contractOptions = (s.contracts || []).filter(c => ['signed', 'executing', 'completed', 'terminated'].includes(c.contractStatus));
     },
     switchProject(p) {
       const id = String(p.id);
@@ -358,38 +381,22 @@ export default {
     goProposal() {
       this.$router.push({ path: '/poms/phase2/proposal', query: { projectId: this.currentProjectId } });
     },
-    addTeamRow() {
-      this.teamRows.push({
-        id: '',
-        userId: '',
-        userName: '',
-        roleType: 'member',
-        ratio: 100,
-        joinDate: new Date().toISOString().slice(0, 10),
+    openAttachContract() {
+      this.loadContractOptions();
+      this.appendContractIds = [];
+      this.contractAppendVisible = true;
+    },
+    submitAttachContract() {
+      attachContracts(this.currentProjectId, this.appendContractIds).then(() => {
+        this.$message.success('合同已关联到项目');
+        this.contractAppendVisible = false;
+        this.reload();
       });
     },
-    onTeamUserChange(row) {
-      const u = MOCK_USERS.find(x => x.id === row.userId);
-      row.userName = u?.name || '';
-    },
-    saveTeam() {
-      if (this.teamRows.some(r => !r.userId)) {
-        this.$message.warning('请为每位成员选择姓名');
-        return;
-      }
-      this.teamSaving = true;
-      saveProjectRoles(this.currentProjectId, this.teamRows)
-        .then(() => {
-          this.$message.success('团队已保存');
-          this.reload();
-        })
-        .finally(() => {
-          this.teamSaving = false;
-        });
-    },
-    goContract() {
-      if (this.projectObj.contractId) {
-        this.$router.push({ path: '/poms/phase1/contract', query: { contractId: this.projectObj.contractId } });
+    goContract(contractId) {
+      const id = contractId || this.projectObj.contractId;
+      if (id) {
+        this.$router.push({ path: '/poms/phase1/contract', query: { contractId: id } });
       }
     },
     goExpense() {
@@ -420,6 +427,15 @@ export default {
     color: #909399;
     font-size: 13px;
     margin-bottom: 12px;
+  }
+  .contract-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+  .contract-tag {
+    cursor: pointer;
   }
   .team-toolbar {
     margin-bottom: 12px;

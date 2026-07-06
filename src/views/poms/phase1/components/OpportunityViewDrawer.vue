@@ -1,13 +1,5 @@
 <template>
-  <el-drawer
-    v-model="visible"
-    :title="null"
-    size="760px"
-    append-to-body
-    destroy-on-close
-    class="opp-view-drawer"
-    @closed="$emit('closed')"
-  >
+  <el-drawer v-model="visible" :title="null" size="760px" append-to-body destroy-on-close class="opp-view-drawer" @closed="$emit('closed')">
     <div v-if="detail" v-loading="loading" class="opp-view">
       <div class="opp-view__hero">
         <div class="opp-view__hero-main">
@@ -63,13 +55,7 @@
       <div v-if="actionItems.length" class="opp-view__actions">
         <div class="opp-view__actions-title">商机操作</div>
         <div class="opp-view__actions-btns">
-          <el-button
-            v-for="item in actionItems"
-            :key="item.key"
-            :type="item.type"
-            plain
-            @click="$emit(item.event, detail)"
-          >
+          <el-button v-for="item in actionItems" :key="item.key" :type="item.type" plain @click="$emit(item.event, detail)">
             {{ item.label }}
           </el-button>
         </div>
@@ -79,14 +65,7 @@
 </template>
 
 <script>
-import {
-  OPP_SOURCE,
-  OPP_STAGE,
-  OPP_STATUS,
-  OPP_STATUS_TAG,
-  PROJECT_TYPE,
-  labelOf,
-} from '../option/dict';
+import { OPP_SOURCE, OPP_STAGE, OPP_STATUS, OPP_STATUS_TAG, PROJECT_TYPE, labelOf } from '../option/dict';
 
 const STAGE_FLOW = ['contact', 'requirement', 'proposal', 'quote', 'negotiation'];
 
@@ -97,18 +76,7 @@ export default {
     detail: { type: Object, default: null },
     loading: { type: Boolean, default: false },
   },
-  emits: [
-    'update:modelValue',
-    'closed',
-    'advance',
-    'rollback',
-    'mark-won',
-    'mark-lost',
-    'suspend',
-    'resume',
-    'create-tender',
-    'go-customer',
-  ],
+  emits: ['update:modelValue', 'closed', 'advance', 'rollback', 'mark-won', 'mark-lost', 'suspend', 'resume', 'create-tender', 'go-customer'],
   data() {
     return {
       OPP_SOURCE,

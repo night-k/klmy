@@ -4,9 +4,6 @@
       <el-tab-pane label="全部" name="" />
       <el-tab-pane v-for="s in TASK_STATUS" :key="s.value" :label="s.label" :name="s.value" />
     </el-tabs>
-    <div class="table-toolbar">
-      <el-button type="primary" :disabled="!selected.length" @click="dispatchVisible = true">批量派发</el-button>
-    </div>
     <avue-crud
       ref="crudLedger"
       v-model:page="page"
@@ -23,8 +20,11 @@
       @on-load="onLoad"
       @selection-change="selected = $event"
     >
+      <template #menu-left>
+        <el-button type="primary" :disabled="!selected.length" @click="dispatchVisible = true">批量派发</el-button>
+      </template>
       <template #code="{ row, size }">
-        <el-button link type="primary" :size="size" @click="openTaskDetail(row)">{{ row.code }}</el-button>
+        <el-link type="primary" :size="size" @click="openTaskDetail(row)">{{ row.code }}</el-link>
       </template>
       <template #status="{ row }">
         <el-tag size="small" :type="TASK_STATUS_TAG[row.status]">{{ labelOf(TASK_STATUS, row.status) }}</el-tag>
@@ -32,11 +32,11 @@
       <template #planRange="{ row }">{{ row.planStartDate }} ~ {{ row.planEndDate }}</template>
       <template #deliverableCount="{ row }">{{ row.deliverableCount || 0 }}</template>
       <template #menu="{ row, size }">
-        <el-button link type="primary" :size="size" @click="openTaskDetail(row)">详情</el-button>
-        <el-button v-if="row.status === 'dispatched'" link type="primary" :size="size" @click="doStart(row)">开始执行</el-button>
-        <el-button v-if="row.status === 'in_progress'" link type="warning" :size="size" @click="doSubmitReview(row)">提交审核</el-button>
-        <el-button v-if="row.status === 'pending_review'" link type="primary" :size="size" @click="openTaskDetail(row, 'review')">审核处理</el-button>
-        <el-button v-if="['in_progress', 'dispatched'].includes(row.status)" link type="success" :size="size" @click="openTaskDetail(row, 'deliverable')">上传成果物</el-button>
+        <el-button type="primary" link :size="size" @click="openTaskDetail(row)">查看</el-button>
+        <el-button v-if="row.status === 'dispatched'" type="primary" link :size="size" @click="doStart(row)">开始执行</el-button>
+        <el-button v-if="row.status === 'in_progress'" type="warning" link :size="size" @click="doSubmitReview(row)">提交审核</el-button>
+        <el-button v-if="row.status === 'pending_review'" type="primary" link :size="size" @click="openTaskDetail(row, 'review')">审核处理</el-button>
+        <el-button v-if="['in_progress', 'dispatched'].includes(row.status)" type="success" link :size="size" @click="openTaskDetail(row, 'deliverable')">上传成果物</el-button>
       </template>
     </avue-crud>
     <dispatch-dialog v-model="dispatchVisible" :tasks="selected.filter(t => t.status === 'pending_dispatch')" @success="onDispatchSuccess" />
@@ -144,9 +144,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.table-toolbar {
-  margin-bottom: 8px;
-}
-</style>

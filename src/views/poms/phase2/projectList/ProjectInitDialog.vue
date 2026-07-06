@@ -1,8 +1,13 @@
 <template>
   <el-dialog v-model="visible" title="项目立项" width="620px" append-to-body @closed="$emit('closed')">
     <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-      <el-form-item label="关联合同">
+      <el-form-item v-if="contractId" label="关联合同">
         <el-input :model-value="contractLabel" disabled />
+      </el-form-item>
+      <el-form-item v-else label="关联合同">
+        <el-select v-model="selectedContractIds" multiple filterable clearable collapse-tags collapse-tags-tooltip placeholder="可选择多个已签合同" style="width: 100%" @change="onContractsChange">
+          <el-option v-for="item in contractOptions" :key="item.id" :label="`${item.code} - ${item.projectName}`" :value="item.id" />
+        </el-select>
       </el-form-item>
       <el-form-item v-if="!contractId" label="客户名称" prop="customerName">
         <el-input v-model="form.customerName" placeholder="手工创建项目时必填" />
@@ -84,6 +89,8 @@ export default {
       MOCK_USERS,
       loading: false,
       contract: null,
+      contractOptions: [],
+      selectedContractIds: [],
       techFiles: [],
       qualFiles: [],
       form: {
@@ -128,7 +135,11 @@ export default {
       immediate: true,
       handler(id) {
         if (id) this.loadContract(id);
+        else this.contract = null;
       },
+    },
+    visible(val) {
+      if (val) this.loadContractOptions();
     },
   },
   methods: {
@@ -137,10 +148,35 @@ export default {
       this.contract = s.contracts.find(c => c.id === id);
       if (!this.contract) return;
       this.form.projectName = this.contract.projectName;
+      this.form.customerName = this.contract.customerName;
       this.form.budget = this.contract.contractAmount;
       this.form.planStartDate = this.contract.serviceStartDate || '';
       this.form.planEndDate = this.contract.serviceEndDate || '';
       this.form.serviceType = this.contract.contractType || 'tech_service';
+    },
+    loadContractOptions() {
+      const s = loadStore();
+      this.contractOptions = (s.contracts || []).filter(c => ['signed', 'executing', 'completed'].includes(c.contractStatus) && !c.projectId);
+    },
+    onContractsChange(ids) {
+      const selected = ids.map(id => this.contractOptions.find(c => c.id === id)).filter(Boolean);
+      if (!selected.length) return;
+      const first = selected[0];
+      this.form.projectName = this.form.projectName || first.projectName;
+      this.form.customerName = this.form.customerName || first.customerName;
+      this.form.budget = selected.reduce((sum, item) => sum + (Number(item.contractAmount) || 0), 0);
+      this.form.planStartDate =
+        selected
+          .map(item => item.serviceStartDate)
+          .filter(Boolean)
+          .sort()[0] || this.form.planStartDate;
+      this.form.planEndDate =
+        selected
+          .map(item => item.serviceEndDate)
+          .filter(Boolean)
+          .sort()
+          .pop() || this.form.planEndDate;
+      this.form.serviceType = first.contractType || this.form.serviceType;
     },
     onCooperationChange(val) {
       if (val === 'self') this.form.partnerCompany = '';
@@ -158,6 +194,7 @@ export default {
         this.loading = true;
         const payload = {
           ...this.form,
+          contractIds: this.contractId ? [this.contractId] : this.selectedContractIds,
           attachments: {
             technicalFiles: this.mapFiles(this.techFiles),
             qualificationFiles: this.mapFiles(this.qualFiles),

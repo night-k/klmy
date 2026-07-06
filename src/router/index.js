@@ -21,6 +21,24 @@ const phase2Children = [
   { path: 'plan', name: 'PomsPhase2Plan', meta: { title: '项目计划' }, component: () => import('@/views/poms/phase2/plan/index.vue') },
   { path: 'gantt', name: 'PomsPhase2Gantt', meta: { title: '项目甘特图' }, component: () => import('@/views/poms/phase2/gantt/index.vue') },
   { path: 'task', name: 'PomsPhase2Task', meta: { title: '项目任务' }, component: () => import('@/views/poms/phase2/task/index.vue') },
+  {
+    path: 'deliverable',
+    redirect: to => ({ path: '/poms/phase2/task', query: { ...to.query, status: 'in_progress' } }),
+  },
+  {
+    path: 'review',
+    redirect: to => ({ path: '/poms/phase2/task', query: { ...to.query, status: 'pending_review' } }),
+  },
+  {
+    path: 'acceptance',
+    redirect: to => {
+      const q = { ...to.query, tab: 'acceptance' };
+      if (q.projectId) {
+        return { path: `/poms/phase2/projectSpace/${q.projectId}`, query: { tab: 'acceptance' } };
+      }
+      return { path: '/poms/phase2/projectSpace', query: q };
+    },
+  },
 ];
 
 const phase3Children = [
@@ -30,10 +48,20 @@ const phase3Children = [
   { path: 'search', name: 'PomsPhase3Search', meta: { title: '全文搜索' }, component: () => import('@/views/poms/phase3/search/index.vue') },
 ];
 
+const phase4Children = [
+  { path: 'index', name: 'PomsPhase4Demo', meta: { title: '人才主线演示首页' }, component: () => import('@/views/poms/phase4/index.vue') },
+  { path: 'candidate', name: 'PomsPhase4Candidate', meta: { title: '候选人池' }, component: () => import('@/views/poms/phase4/candidate/index.vue') },
+  { path: 'talent', name: 'PomsPhase4Talent', meta: { title: '人才档案' }, component: () => import('@/views/poms/phase4/talent/index.vue') },
+  { path: 'resume', name: 'PomsPhase4Resume', meta: { title: '简历生成' }, component: () => import('@/views/poms/phase4/resume/index.vue') },
+  { path: 'bid', name: 'PomsPhase4Bid', meta: { title: '投标包' }, component: () => import('@/views/poms/phase4/bid/index.vue') },
+  { path: 'template', name: 'PomsPhase4Template', meta: { title: '模板管理' }, component: () => import('@/views/poms/phase4/template/index.vue') },
+];
+
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/', redirect: '/poms/phase1/index' },
+    { path: '/poms/phase/index4', redirect: '/poms/phase4/index' },
     {
       path: '/poms/phase1',
       component: DemoLayout,
@@ -54,6 +82,13 @@ const router = createRouter({
       redirect: '/poms/phase3/index',
       meta: { title: '知识管理' },
       children: phase3Children,
+    },
+    {
+      path: '/poms/phase4',
+      component: PomsDemoLayout,
+      redirect: '/poms/phase4/index',
+      meta: { title: '人才管理' },
+      children: phase4Children,
     },
   ],
 });

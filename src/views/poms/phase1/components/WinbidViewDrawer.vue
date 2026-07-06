@@ -1,13 +1,5 @@
 <template>
-  <el-drawer
-    v-model="visible"
-    :title="null"
-    size="780px"
-    append-to-body
-    destroy-on-close
-    class="winbid-view-drawer"
-    @closed="$emit('closed')"
-  >
+  <el-drawer v-model="visible" :title="null" size="780px" append-to-body destroy-on-close class="winbid-view-drawer" @closed="$emit('closed')">
     <div v-if="detail" v-loading="loading" class="winbid-view">
       <div class="winbid-view__hero">
         <div class="winbid-view__hero-main">
@@ -66,13 +58,7 @@
       <div v-if="actionItems.length" class="winbid-view__actions">
         <div class="winbid-view__actions-title">中标操作</div>
         <div class="winbid-view__actions-btns">
-          <el-button
-            v-for="item in actionItems"
-            :key="item.key"
-            :type="item.type"
-            plain
-            @click="$emit(item.event, detail)"
-          >
+          <el-button v-for="item in actionItems" :key="item.key" :type="item.type" plain @click="$emit(item.event, detail)">
             {{ item.label }}
           </el-button>
         </div>
@@ -115,9 +101,7 @@ export default {
       return !this.fileEditing;
     },
     actionItems() {
-      const items = [
-        { key: 'edit-winbid', label: '编辑中标', type: 'info', event: 'edit-winbid' },
-      ];
+      const items = [{ key: 'edit-winbid', label: '编辑中标', type: 'info', event: 'edit-winbid' }];
       if (this.detail?.contractStatus === 'generated') {
         items.push({ key: 'view-contract', label: '查看合同', type: 'success', event: 'view-contract' });
       } else {

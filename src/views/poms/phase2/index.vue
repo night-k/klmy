@@ -5,11 +5,11 @@
         <div class="card-header">
           <span>项目主线业务流程（11.2 立项 → 验收）</span>
           <div class="header-actions">
-            <span v-if="isDemoEnv" class="demo-label">演示项目</span>
+            <span v-if="isDemoEnv" class="demo-label">当前项目</span>
             <el-select v-if="isDemoEnv" v-model="demoProjectId" filterable style="width: 260px" @change="onDemoProjectChange">
               <el-option v-for="p in projects" :key="p.id" :label="`${p.code} · ${p.projectName}`" :value="String(p.id)" />
             </el-select>
-            <el-button v-if="isDemoEnv" type="warning" plain size="small" @click="handleReset">重置演示数据</el-button>
+            <el-button v-if="isDemoEnv" type="warning" plain size="small" @click="handleReset">重置数据</el-button>
           </div>
         </div>
       </template>
@@ -18,14 +18,12 @@
       </el-steps>
     </el-card>
 
-    <el-row :gutter="16" class="stat-row">
-      <el-col v-for="item in statCards" :key="item.key" :span="3">
-        <el-card shadow="hover" class="stat-card" @click="go(item.path, item.flowKey)">
-          <div class="stat-num">{{ stats[item.key] || 0 }}</div>
-          <div class="stat-label">{{ item.label }}</div>
-        </el-card>
-      </el-col>
-    </el-row>
+    <div class="stat-row">
+      <el-card v-for="item in statCards" :key="item.key" shadow="hover" class="stat-card" @click="go(item.path, item.flowKey)">
+        <div class="stat-num">{{ stats[item.key] || 0 }}</div>
+        <div class="stat-label">{{ item.label }}</div>
+      </el-card>
+    </div>
 
     <el-row :gutter="16">
       <el-col v-for="mod in modules" :key="mod.key" :span="8">
@@ -87,7 +85,7 @@ export default {
         { key: 'risk', title: '风险管理', desc: '风险登记、等级、措施与跟踪', path: '/projectManage/risk/index', icon: '险' },
         { key: 'overdue', title: '逾期预警', desc: '超期任务识别、预警和处理记录', path: '/projectManage/projectOverdueAlert/index', icon: '预' },
         { key: 'quality', title: '质量统计', desc: '完成率、通过率、整改次数、验收通过率', path: '/projectManage/projectHealthMonitor/index', icon: '质' },
-        { key: 'contract', title: '销售主线', desc: '返回 Phase1 演示', path: '/poms/phase1/index', icon: '销' },
+        { key: 'contract', title: '销售主线', desc: '返回销售管理', path: '/poms/phase1/index', icon: '销' },
       ];
     },
   },
@@ -200,11 +198,15 @@ export default {
 }
 .stat-row {
   margin-bottom: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  gap: 16px;
 }
 .stat-card {
   cursor: pointer;
   text-align: center;
   padding: 8px 0;
+  min-width: 0;
 }
 .stat-num {
   font-size: 28px;

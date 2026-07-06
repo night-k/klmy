@@ -6,6 +6,7 @@
         <router-link to="/poms/phase1/index" class="nav-link" active-class="is-active">销售主线</router-link>
         <router-link to="/poms/phase2/index" class="nav-link" active-class="is-active">项目主线</router-link>
         <router-link to="/poms/phase3/index" class="nav-link" active-class="is-active">知识主线</router-link>
+        <router-link to="/poms/phase4/index" class="nav-link" active-class="is-active">人才主线</router-link>
 
         <template v-if="isPhase2">
           <span class="nav-divider" />
@@ -22,6 +23,15 @@
           <router-link to="/poms/phase3/document" class="nav-link" active-class="is-active">文档中心</router-link>
           <router-link to="/poms/phase3/tag" class="nav-link" active-class="is-active">标签管理</router-link>
           <router-link to="/poms/phase3/search" class="nav-link" active-class="is-active">全文搜索</router-link>
+        </template>
+
+        <template v-if="isPhase4">
+          <span class="nav-divider" />
+          <router-link to="/poms/phase4/candidate" class="nav-link" active-class="is-active">候选人池</router-link>
+          <router-link to="/poms/phase4/talent" class="nav-link" active-class="is-active">人才档案</router-link>
+          <router-link to="/poms/phase4/resume" class="nav-link" active-class="is-active">简历生成</router-link>
+          <router-link to="/poms/phase4/bid" class="nav-link" active-class="is-active">投标包</router-link>
+          <router-link to="/poms/phase4/template" class="nav-link" active-class="is-active">模板管理</router-link>
         </template>
       </nav>
       <el-button type="primary" plain size="small" @click="goFlowOverview">流程总览</el-button>
@@ -46,6 +56,9 @@ export default {
     isPhase3() {
       return this.$route.path.startsWith('/poms/phase3');
     },
+    isPhase4() {
+      return this.$route.path.startsWith('/poms/phase4');
+    },
   },
   methods: {
     goFlowOverview() {
@@ -59,62 +72,58 @@ export default {
 .poms-demo-layout {
   position: fixed;
   inset: 0;
-  z-index: 1;
   display: flex;
   flex-direction: column;
-  background: #f0f2f5;
+  background: #f5f7fa;
 }
 .poms-demo-header {
-  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 0 20px;
   height: 52px;
   background: #fff;
-  border-bottom: 1px solid #e4e7ed;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid #ebeef5;
+  flex-shrink: 0;
+  z-index: 100;
 }
 .poms-demo-header__brand {
   font-weight: 700;
-  color: #303133;
-  white-space: nowrap;
+  font-size: 15px;
+  color: #1890ff;
   cursor: pointer;
-  &:hover { color: #409eff; }
+  white-space: nowrap;
 }
 .poms-demo-header__nav {
-  display: flex;
-  gap: 8px;
   flex: 1;
-  overflow-x: auto;
+  display: flex;
   align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  min-width: 0;
+}
+.nav-link {
+  padding: 6px 10px;
+  font-size: 13px;
+  color: #606266;
+  text-decoration: none;
+  border-radius: 4px;
+  white-space: nowrap;
+  &:hover { color: #1890ff; background: #ecf5ff; }
+  &.is-active { color: #1890ff; font-weight: 600; background: #ecf5ff; }
 }
 .nav-divider {
   width: 1px;
-  height: 20px;
+  height: 16px;
   background: #dcdfe6;
-  margin: 0 4px;
+  margin: 0 6px;
   flex-shrink: 0;
-}
-.nav-link {
-  flex-shrink: 0;
-  padding: 6px 12px;
-  border-radius: 4px;
-  color: #606266;
-  text-decoration: none;
-  font-size: 13px;
-  &:hover { color: #409eff; background: #ecf5ff; }
-  &.is-active { color: #409eff; background: #ecf5ff; font-weight: 600; }
 }
 .poms-demo-main {
   flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 16px;
+  overflow: auto;
 }
 .poms-demo-main-inner {
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
+  min-height: 100%;
 }
 </style>

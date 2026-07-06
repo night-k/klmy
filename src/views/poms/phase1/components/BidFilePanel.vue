@@ -1,15 +1,8 @@
 <template>
   <div class="bid-file-panel">
     <div v-if="!readonly" class="bid-file-panel__upload">
-      <el-upload
-        drag
-        :show-file-list="false"
-        :auto-upload="true"
-        :http-request="handleUpload"
-        :accept="accept"
-        :disabled="uploading || (limit > 0 && fileList.length >= limit)"
-      >
-        <el-icon class="bid-file-panel__icon"><UploadFilled /></el-icon>
+      <el-upload drag :show-file-list="false" :auto-upload="true" :http-request="handleUpload" :accept="accept" :disabled="uploading || (limit > 0 && fileList.length >= limit)">
+        <el-icon class="bid-file-panel__icon"><upload-filled /></el-icon>
         <div class="bid-file-panel__tip">{{ uploadLabel }}，或<em>点击上传</em></div>
         <template #tip>
           <div class="bid-file-panel__hint">{{ hintText }}{{ limit ? `，最多 ${limit} 个` : '' }}</div>
@@ -21,7 +14,7 @@
     <div v-else class="bid-file-panel__list">
       <div v-for="file in fileList" :key="file.id" class="bid-file-panel__item">
         <div class="bid-file-panel__item-main">
-          <el-icon class="bid-file-panel__file-icon"><Document /></el-icon>
+          <el-icon class="bid-file-panel__file-icon"><document /></el-icon>
           <div class="bid-file-panel__meta">
             <div class="bid-file-panel__name" :title="file.name">{{ file.name }}</div>
             <div class="bid-file-panel__sub">

@@ -1,13 +1,5 @@
 <template>
-  <el-drawer
-    v-model="visible"
-    :title="null"
-    size="780px"
-    append-to-body
-    destroy-on-close
-    class="tender-view-drawer"
-    @closed="$emit('closed')"
-  >
+  <el-drawer v-model="visible" :title="null" size="780px" append-to-body destroy-on-close class="tender-view-drawer" @closed="$emit('closed')">
     <div v-if="detail" v-loading="loading" class="tender-view">
       <div class="tender-view__hero">
         <div class="tender-view__hero-main">
@@ -64,23 +56,13 @@
             </el-button>
           </div>
         </template>
-        <bid-file-panel
-          v-model="localBidFiles"
-          :readonly="fileReadonly"
-          @change="handleFilesChange"
-        />
+        <bid-file-panel v-model="localBidFiles" :readonly="fileReadonly" @change="handleFilesChange" />
       </el-card>
 
       <div v-if="actionItems.length" class="tender-view__actions">
         <div class="tender-view__actions-title">投标操作</div>
         <div class="tender-view__actions-btns">
-          <el-button
-            v-for="item in actionItems"
-            :key="item.key"
-            :type="item.type"
-            plain
-            @click="$emit(item.event, detail)"
-          >
+          <el-button v-for="item in actionItems" :key="item.key" :type="item.type" plain @click="$emit(item.event, detail)">
             {{ item.label }}
           </el-button>
         </div>
@@ -101,14 +83,7 @@ export default {
     detail: { type: Object, default: null },
     loading: { type: Boolean, default: false },
   },
-  emits: [
-    'update:modelValue',
-    'closed',
-    'edit-result',
-    'edit-tender',
-    'register-winbid',
-    'save-files',
-  ],
+  emits: ['update:modelValue', 'closed', 'edit-result', 'edit-tender', 'register-winbid', 'save-files'],
   data() {
     return {
       fileEditing: false,

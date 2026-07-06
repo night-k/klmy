@@ -1,11 +1,4 @@
-import {
-  createCrudApi,
-  getPaymentStatistics,
-  getPaymentProjectTree,
-  getContractPaymentPage,
-  getContractPaymentDetail,
-  updatePaymentNode,
-} from './mockStore';
+import { createCrudApi, getPaymentStatistics, getPaymentProjectTree, getContractPaymentPage, getContractPaymentDetail, updatePaymentNode } from './mockStore';
 
 const api = createCrudApi('payments');
 

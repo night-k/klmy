@@ -111,11 +111,13 @@ export default {
     openView(row) {
       this.viewLoading = true;
       this.viewVisible = true;
-      getDetail(row.id).then(res => {
-        this.viewDetail = { ...res.data.data };
-      }).finally(() => {
-        this.viewLoading = false;
-      });
+      getDetail(row.id)
+        .then(res => {
+          this.viewDetail = { ...res.data.data };
+        })
+        .finally(() => {
+          this.viewLoading = false;
+        });
     },
     refreshViewDetail(id) {
       if (!this.viewVisible || !id) return;
@@ -139,7 +141,9 @@ export default {
       }
     },
     beforeOpen(done, type) {
-      const open = () => this.$nextTick(() => done());
+      const open = () => {
+        this.$nextTick(() => done());
+      };
       if (type === 'edit') {
         getDetail(this.form.id).then(res => {
           this.form = { ...res.data.data };
@@ -231,35 +235,64 @@ export default {
         loading();
         return;
       }
-      add({ ...row, stage: row.stage || 'contact', status: row.status || 'ongoing' }).then(() => {
-        this.onLoad(this.page);
-        this.$message.success('保存成功');
-        done();
-      }).finally(() => loading());
+      add({ ...row, stage: row.stage || 'contact', status: row.status || 'ongoing' })
+        .then(() => {
+          this.onLoad(this.page);
+          this.$message.success('保存成功');
+          done();
+        })
+        .finally(() => loading());
     },
     rowUpdate(row, index, done, loading) {
-      update(row).then(() => { this.onLoad(this.page); done(); }).finally(() => loading());
+      update(row)
+        .then(() => {
+          this.onLoad(this.page);
+          done();
+        })
+        .finally(() => loading());
     },
     rowDel(row) {
-      this.$confirm('确定删除？').then(() => remove(row.id)).then(() => { this.onLoad(this.page); });
+      this.$confirm('确定删除？')
+        .then(() => remove(row.id))
+        .then(() => {
+          this.onLoad(this.page);
+        });
     },
     onTabChange() {
       this.page.currentPage = 1;
       this.onLoad(this.page);
     },
-    searchReset() { this.query = {}; this.onLoad(this.page); },
-    searchChange(params, done) { this.query = params; this.page.currentPage = 1; this.onLoad(this.page); done(); },
-    currentChange(p) { this.page.currentPage = p; },
-    sizeChange(s) { this.page.pageSize = s; },
-    refreshChange() { this.onLoad(this.page); },
+    searchReset() {
+      this.query = {};
+      this.onLoad(this.page);
+    },
+    searchChange(params, done) {
+      this.query = params;
+      this.page.currentPage = 1;
+      this.onLoad(this.page);
+      done();
+    },
+    currentChange(p) {
+      this.page.currentPage = p;
+    },
+    sizeChange(s) {
+      this.page.pageSize = s;
+    },
+    refreshChange() {
+      this.onLoad(this.page);
+    },
     onLoad(page) {
       this.loading = true;
       const q = { ...this.query };
       if (this.tabStatus) q.status = this.tabStatus;
-      getPage(page.currentPage, page.pageSize, q).then(res => {
-        this.page.total = res.data.data.total;
-        this.data = res.data.data.records;
-      }).finally(() => { this.loading = false; });
+      getPage(page.currentPage, page.pageSize, q)
+        .then(res => {
+          this.page.total = res.data.data.total;
+          this.data = res.data.data.records;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
   },
 };

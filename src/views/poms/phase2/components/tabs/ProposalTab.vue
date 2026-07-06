@@ -25,14 +25,11 @@
             <el-table-column label="职责"
               ><template #default="{ row }"><el-input v-model="row.duty" /></template
             ></el-table-column>
-            <el-table-column label="投入%" width="90"
-              ><template #default="{ row }"><el-input-number v-model="row.ratio" :min="0" :max="100" size="small" /></template
-            ></el-table-column>
             <el-table-column width="60"
               ><template #default="{ $index }"><el-button link type="danger" @click="form.teamMembers.splice($index, 1)">删</el-button></template></el-table-column
             >
           </el-table>
-          <el-button link type="primary" @click="form.teamMembers.push({ name: '', role: '项目成员', duty: '', ratio: 100 })">+ 添加成员</el-button>
+          <el-button link type="primary" @click="form.teamMembers.push({ name: '', role: '项目成员', duty: '' })">+ 添加成员</el-button>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="save">保存</el-button>
@@ -64,7 +61,6 @@
           <el-table-column prop="name" label="姓名" />
           <el-table-column prop="role" label="角色" />
           <el-table-column prop="duty" label="职责" />
-          <el-table-column prop="ratio" label="投入%" width="80" />
         </el-table>
         <div class="actions">
           <el-button v-if="proposal.auditStatus !== 'approved'" @click="startEdit">编辑</el-button>
@@ -121,9 +117,9 @@ export default {
             content: '',
             serviceContent: '',
             teamMembers: [
-              { name: '李华', role: '项目经理', duty: '项目统筹', ratio: 100 },
-              { name: '王磊', role: '技术负责人', duty: '技术方案', ratio: 80 },
-              { name: '赵敏', role: '质量负责人', duty: '成果审核', ratio: 60 },
+              { name: '李华', role: '项目经理', duty: '项目统筹' },
+              { name: '王磊', role: '技术负责人', duty: '技术方案' },
+              { name: '赵敏', role: '质量负责人', duty: '成果审核' },
             ],
           };
       this.proposalFiles = (this.form.files || []).map(f => ({ name: f.name, url: f.url || '#' }));

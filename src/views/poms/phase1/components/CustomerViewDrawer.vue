@@ -1,13 +1,5 @@
 <template>
-  <el-drawer
-    v-model="visible"
-    :title="null"
-    size="780px"
-    append-to-body
-    destroy-on-close
-    class="customer-view-drawer"
-    @closed="$emit('closed')"
-  >
+  <el-drawer v-model="visible" :title="null" size="780px" append-to-body destroy-on-close class="customer-view-drawer" @closed="$emit('closed')">
     <div v-if="detail" v-loading="loading" class="customer-view">
       <div class="customer-view__hero">
         <div class="customer-view__hero-main">
@@ -111,14 +103,7 @@
 </template>
 
 <script>
-import {
-  CUSTOMER_LEVEL,
-  CUSTOMER_STATUS,
-  CUSTOMER_TYPE,
-  INDUSTRY,
-  PROJECT_STATUS,
-  labelOf,
-} from '../option/dict';
+import { CUSTOMER_LEVEL, CUSTOMER_STATUS, CUSTOMER_TYPE, INDUSTRY, PROJECT_STATUS, labelOf } from '../option/dict';
 
 export default {
   name: 'CustomerViewDrawer',

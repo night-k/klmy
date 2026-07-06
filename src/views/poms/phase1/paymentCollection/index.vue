@@ -33,37 +33,13 @@
       @on-load="onLoad"
     >
       <template #projectId-search>
-        <el-select
-          v-model="search.projectId"
-          filterable
-          clearable
-          placeholder="请选择项目"
-          style="width: 100%"
-          @change="onSearchProjectChange"
-        >
-          <el-option
-            v-for="item in projectOptions"
-            :key="item.id"
-            :label="item.label"
-            :value="item.id"
-          />
+        <el-select v-model="search.projectId" filterable clearable placeholder="请选择项目" style="width: 100%" @change="onSearchProjectChange">
+          <el-option v-for="item in projectOptions" :key="item.id" :label="item.label" :value="item.id" />
         </el-select>
       </template>
       <template #contractId-search>
-        <el-select
-          v-model="search.contractId"
-          filterable
-          clearable
-          placeholder="请选择合同"
-          style="width: 100%"
-          @change="onSearchContractChange"
-        >
-          <el-option
-            v-for="item in contractSearchOptions"
-            :key="item.id"
-            :label="item.label"
-            :value="item.id"
-          />
+        <el-select v-model="search.contractId" filterable clearable placeholder="请选择合同" style="width: 100%" @change="onSearchContractChange">
+          <el-option v-for="item in contractSearchOptions" :key="item.id" :label="item.label" :value="item.id" />
         </el-select>
       </template>
       <template #menu="{ row, size }">
@@ -81,15 +57,7 @@
       </template>
     </avue-crud>
 
-    <payment-view-drawer
-      ref="paymentViewDrawer"
-      v-model="viewVisible"
-      :detail="viewDetail"
-      :loading="viewLoading"
-      :saving="viewSaving"
-      @save-node="savePaymentNode"
-      @closed="viewDetail = null"
-    />
+    <payment-view-drawer ref="paymentViewDrawer" v-model="viewVisible" :detail="viewDetail" :loading="viewLoading" :saving="viewSaving" @save-node="savePaymentNode" @closed="viewDetail = null" />
   </basic-container>
 </template>
 
@@ -175,11 +143,13 @@ export default {
       const contractId = row.contractId || row.id;
       this.viewLoading = true;
       this.viewVisible = true;
-      getDetail(contractId).then(res => {
-        this.viewDetail = res.data.data;
-      }).finally(() => {
-        this.viewLoading = false;
-      });
+      getDetail(contractId)
+        .then(res => {
+          this.viewDetail = res.data.data;
+        })
+        .finally(() => {
+          this.viewLoading = false;
+        });
     },
     savePaymentNode(node) {
       this.viewSaving = true;
@@ -286,9 +256,15 @@ export default {
       this.loadAll();
       done();
     },
-    currentChange(p) { this.page.currentPage = p; },
-    sizeChange(s) { this.page.pageSize = s; },
-    refreshChange() { this.loadAll(); },
+    currentChange(p) {
+      this.page.currentPage = p;
+    },
+    sizeChange(s) {
+      this.page.pageSize = s;
+    },
+    refreshChange() {
+      this.loadAll();
+    },
     onLoad(page) {
       this.loading = true;
       const q = { ...this.query };
@@ -298,10 +274,14 @@ export default {
         q.projectId = this.search.projectId;
       }
       if (this.tabStatus) q.status = this.tabStatus;
-      getPage(page.currentPage, page.pageSize, q).then(res => {
-        this.page.total = res.data.data.total;
-        this.data = res.data.data.records;
-      }).finally(() => { this.loading = false; });
+      getPage(page.currentPage, page.pageSize, q)
+        .then(res => {
+          this.page.total = res.data.data.total;
+          this.data = res.data.data.records;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
   },
 };

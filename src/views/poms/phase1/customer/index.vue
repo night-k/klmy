@@ -38,15 +38,7 @@
       </template>
     </avue-crud>
 
-    <customer-view-drawer
-      v-model="viewVisible"
-      :detail="viewDetail"
-      :loading="viewLoading"
-      :history="viewHistory"
-      :history-loading="viewHistoryLoading"
-      @edit="editFromView"
-      @closed="onViewClosed"
-    />
+    <customer-view-drawer v-model="viewVisible" :detail="viewDetail" :loading="viewLoading" :history="viewHistory" :history-loading="viewHistoryLoading" @edit="editFromView" @closed="onViewClosed" />
   </basic-container>
 </template>
 
@@ -117,7 +109,9 @@ export default {
       this.viewHistory = null;
     },
     beforeOpen(done, type) {
-      const open = () => this.$nextTick(() => done());
+      const open = () => {
+        this.$nextTick(() => done());
+      };
       if (type === 'edit') {
         getDetail(this.form.id).then(res => {
           this.form = { ...res.data.data };
@@ -133,24 +127,30 @@ export default {
       open();
     },
     rowSave(row, done, loading) {
-      add(row).then(() => {
-        this.onLoad(this.page);
-        this.$message.success('保存成功');
-        done();
-      }).finally(() => loading());
+      add(row)
+        .then(() => {
+          this.onLoad(this.page);
+          this.$message.success('保存成功');
+          done();
+        })
+        .finally(() => loading());
     },
     rowUpdate(row, index, done, loading) {
-      update(row).then(() => {
-        this.onLoad(this.page);
-        this.$message.success('更新成功');
-        done();
-      }).finally(() => loading());
+      update(row)
+        .then(() => {
+          this.onLoad(this.page);
+          this.$message.success('更新成功');
+          done();
+        })
+        .finally(() => loading());
     },
     rowDel(row) {
-      this.$confirm('确定删除？').then(() => remove(row.id)).then(() => {
-        this.onLoad(this.page);
-        this.$message.success('删除成功');
-      });
+      this.$confirm('确定删除？')
+        .then(() => remove(row.id))
+        .then(() => {
+          this.onLoad(this.page);
+          this.$message.success('删除成功');
+        });
     },
     searchReset() {
       this.query = {};
@@ -166,18 +166,28 @@ export default {
       this.onLoad(this.page);
       done();
     },
-    currentChange(p) { this.page.currentPage = p; },
-    sizeChange(s) { this.page.pageSize = s; },
-    refreshChange() { this.onLoad(this.page); },
+    currentChange(p) {
+      this.page.currentPage = p;
+    },
+    sizeChange(s) {
+      this.page.pageSize = s;
+    },
+    refreshChange() {
+      this.onLoad(this.page);
+    },
     onLoad(page) {
       this.loading = true;
       const q = { ...this.query };
       if (this.tabStatus) q.status = this.tabStatus;
-      getPage(page.currentPage, page.pageSize, q).then(res => {
-        const d = res.data.data;
-        this.page.total = d.total;
-        this.data = d.records;
-      }).finally(() => { this.loading = false; });
+      getPage(page.currentPage, page.pageSize, q)
+        .then(res => {
+          const d = res.data.data;
+          this.page.total = d.total;
+          this.data = d.records;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
   },
 };

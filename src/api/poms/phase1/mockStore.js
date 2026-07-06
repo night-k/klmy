@@ -1099,7 +1099,9 @@ export function createContractFromWinbid(winbidId) {
 
 export function createProjectFromContract(contractId, formData) {
   const s = loadStore();
-  const contract = s.contracts.find(c => c.id === contractId);
+  const selectedIds = Array.from(new Set([...(formData.contractIds || []), contractId].filter(Boolean)));
+  const contracts = selectedIds.map(id => s.contracts.find(c => c.id === id)).filter(Boolean);
+  const contract = contracts[0];
   if (!contract) {
     const project = {
       id: genId('project'),
@@ -1107,6 +1109,8 @@ export function createProjectFromContract(contractId, formData) {
       projectName: formData.projectName,
       contractId: '',
       contractCode: '',
+      contractIds: [],
+      contracts: [],
       customerId: '',
       customerName: formData.customerName || '手工客户',
       cooperationType: formData.cooperationType || 'self',
@@ -1127,16 +1131,26 @@ export function createProjectFromContract(contractId, formData) {
     saveStore();
     return mockResponse(project);
   }
-  if (contract.projectId) {
-    const existing = s.projects.find(p => p.id === contract.projectId);
+  const existingProjectIds = Array.from(new Set(contracts.map(item => item.projectId).filter(Boolean)));
+  if (existingProjectIds.length === 1) {
+    const existing = syncProjectContracts(
+      s.projects.find(p => p.id === existingProjectIds[0]),
+      s,
+    );
     return mockResponse(existing);
   }
+  if (existingProjectIds.length > 1) {
+    return Promise.reject(new Error('所选合同已关联不同项目，不能合并立项'));
+  }
+  const contractTotal = contracts.reduce((sum, item) => sum + (Number(item.contractAmount) || 0), 0);
   const project = {
     id: genId('project'),
     code: genCode('project'),
     projectName: formData.projectName || contract.projectName,
     contractId: contract.id,
     contractCode: contract.code,
+    contractIds: contracts.map(item => item.id),
+    contracts: contracts.map(toProjectContract),
     customerId: contract.customerId,
     customerName: contract.customerName,
     cooperationType: formData.cooperationType || 'self',
@@ -1144,7 +1158,7 @@ export function createProjectFromContract(contractId, formData) {
     serviceType: formData.serviceType || contract.contractType,
     projectManagerId: formData.projectManagerId || 'u001',
     projectManagerName: formData.projectManagerName || '张明',
-    budget: formData.budget || contract.contractAmount,
+    budget: formData.budget || contractTotal || contract.contractAmount,
     planStartDate: formData.planStartDate || contract.serviceStartDate,
     planEndDate: formData.planEndDate || contract.serviceEndDate,
     status: 'pending_proposal',
@@ -1153,7 +1167,49 @@ export function createProjectFromContract(contractId, formData) {
     createTime: now(),
   };
   s.projects.unshift(project);
-  contract.projectId = project.id;
+  contracts.forEach(item => {
+    item.projectId = project.id;
+  });
+  syncProjectContracts(project, s);
+  saveStore();
+  return mockResponse(project);
+}
+
+function toProjectContract(contract) {
+  return {
+    id: contract.id,
+    code: contract.code,
+    projectName: contract.projectName,
+    customerName: contract.customerName,
+    contractAmount: contract.contractAmount,
+    contractStatus: contract.contractStatus,
+    serviceStartDate: contract.serviceStartDate,
+    serviceEndDate: contract.serviceEndDate,
+  };
+}
+
+export function syncProjectContracts(project, store = loadStore()) {
+  if (!project) return project;
+  const ids = new Set([...(project.contractIds || []), project.contractId].filter(Boolean));
+  (store.contracts || []).filter(contract => contract.projectId === project.id).forEach(contract => ids.add(contract.id));
+  const contracts = [...ids].map(id => (store.contracts || []).find(contract => contract.id === id)).filter(Boolean);
+  project.contractIds = contracts.map(contract => contract.id);
+  project.contracts = contracts.map(toProjectContract);
+  project.contractId = contracts[0]?.id || '';
+  project.contractCode = contracts.map(contract => contract.code).join('、');
+  return project;
+}
+
+export function attachContractsToProject(projectId, contractIds = []) {
+  const s = loadStore();
+  const project = s.projects.find(p => p.id === projectId);
+  if (!project) return mockResponse(null);
+  const ids = Array.from(new Set(contractIds.filter(Boolean)));
+  ids.forEach(id => {
+    const contract = s.contracts.find(c => c.id === id);
+    if (contract) contract.projectId = project.id;
+  });
+  syncProjectContracts(project, s);
   saveStore();
   return mockResponse(project);
 }

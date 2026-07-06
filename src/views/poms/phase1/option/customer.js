@@ -1,11 +1,6 @@
-import {
-  CUSTOMER_TYPE,
-  CUSTOMER_LEVEL,
-  INDUSTRY,
-  CUSTOMER_STATUS,
-} from './dict';
+import { CUSTOMER_TYPE, CUSTOMER_LEVEL, INDUSTRY, CUSTOMER_STATUS } from './dict';
 
-export const Option = _this => ({
+export const Option = () => ({
   border: true,
   index: true,
   viewBtn: false,
@@ -50,7 +45,16 @@ export const Option = _this => ({
           { label: '职务', prop: 'title' },
           { label: '电话', prop: 'phone', rules: [{ required: true, message: '必填', trigger: 'blur' }] },
           { label: '邮箱', prop: 'email' },
-          { label: '主联系人', prop: 'isPrimary', type: 'select', dicData: [{ label: '是', value: true }, { label: '否', value: false }], value: false },
+          {
+            label: '主联系人',
+            prop: 'isPrimary',
+            type: 'select',
+            dicData: [
+              { label: '是', value: true },
+              { label: '否', value: false },
+            ],
+            value: false,
+          },
         ],
       },
     },

@@ -42,12 +42,12 @@ export default {
       return this.canFinish ? '' : '需通过项目验收（最终验收通过）后方可标记完成';
     },
     priorityTip() {
-      return '演示：优先级调整功能待接入';
+      return '优先级调整功能待接入';
     },
   },
   methods: {
     onPriority() {
-      this.$message.info('演示：优先级调整（Mock）');
+      this.$message.info('优先级调整功能待接入');
     },
   },
 };

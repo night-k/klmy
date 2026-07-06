@@ -1,7 +1,7 @@
 /**
  * Phase2 项目主线 Mock 数据层（扩展 Phase1 共用 localStorage）
  */
-import { loadStore, saveStore, now, today } from '../phase1/mockStore';
+import { loadStore, saveStore, now, today, syncProjectContracts } from '../phase1/mockStore';
 
 const pad = (n, len = 3) => String(n).padStart(len, '0');
 
@@ -203,9 +203,42 @@ function createPhase2Seed() {
     ],
     milestones: [
       { id: 'ms-001', projectId: project2Id, name: '开题报告', type: 'start', planDate: '2025-01-15', actualDate: '2025-01-10', status: 'passed', acceptorName: '李华' },
-      { id: 'ms-002', projectId: project2Id, name: '中期评审', type: 'stage', planDate: '2025-12-31', actualDate: '', status: 'in_progress', acceptorName: '李华' },
-      { id: 'ms-003', projectId: project2Id, name: '成果交付', type: 'stage', planDate: '2026-09-30', actualDate: '', status: 'not_started', acceptorName: '李华' },
-      { id: 'ms-004', projectId: project2Id, name: '项目验收', type: 'acceptance', planDate: '2026-12-31', actualDate: '', status: 'not_started', acceptorName: '李华' },
+      {
+        id: 'ms-002',
+        projectId: project2Id,
+        planId: plan1Id,
+        planVersion: 'v1.0',
+        name: '中期评审',
+        type: 'stage',
+        planDate: '2025-12-31',
+        actualDate: '',
+        status: 'in_progress',
+        acceptorName: '李华',
+      },
+      {
+        id: 'ms-003',
+        projectId: project2Id,
+        planId: plan1Id,
+        planVersion: 'v1.0',
+        name: '成果交付',
+        type: 'stage',
+        planDate: '2026-09-30',
+        actualDate: '',
+        status: 'not_started',
+        acceptorName: '李华',
+      },
+      {
+        id: 'ms-004',
+        projectId: project2Id,
+        planId: plan1Id,
+        planVersion: 'v1.0',
+        name: '项目验收',
+        type: 'acceptance',
+        planDate: '2026-12-31',
+        actualDate: '',
+        status: 'not_started',
+        acceptorName: '李华',
+      },
       { id: 'ms-005', projectId: project3Id, name: '开题报告', type: 'start', planDate: '2025-06-15', actualDate: '2025-06-10', status: 'passed', acceptorName: '张明' },
       { id: 'ms-006', projectId: project3Id, name: '中期评审', type: 'stage', planDate: '2025-12-31', actualDate: '2025-12-20', status: 'passed', acceptorName: '张明' },
       { id: 'ms-007', projectId: project3Id, name: '成果交付', type: 'stage', planDate: '2026-05-31', actualDate: '2026-05-28', status: 'passed', acceptorName: '张明' },
@@ -250,6 +283,457 @@ function createPhase2Seed() {
   };
 }
 
+function ensureItem(list, item, matchKey = 'id') {
+  if (!Array.isArray(list) || !item?.[matchKey]) return false;
+  const idx = list.findIndex(row => String(row[matchKey]) === String(item[matchKey]));
+  if (idx >= 0) {
+    list[idx] = { ...item, ...list[idx] };
+    return false;
+  }
+  list.push(item);
+  return true;
+}
+
+function ensurePhase2Coverage(s) {
+  let changed = false;
+  const fixedTask = s.tasks.find(task => task.code === 'TASK-PRJ-2025-0088-001' && !task.id);
+  if (fixedTask) {
+    fixedTask.id = 'task-001';
+    changed = true;
+  }
+
+  const projects = s.projects || [];
+  projects.forEach(project => {
+    const before = JSON.stringify({ contractId: project.contractId, contractCode: project.contractCode, contractIds: project.contractIds, contracts: project.contracts });
+    syncProjectContracts(project, s);
+    const after = JSON.stringify({ contractId: project.contractId, contractCode: project.contractCode, contractIds: project.contractIds, contracts: project.contracts });
+    if (before !== after) changed = true;
+  });
+  const patchProject = (id, patch) => {
+    const project = projects.find(item => item.id === id);
+    if (!project) return;
+    Object.keys(patch).forEach(key => {
+      if (project[key] === undefined || project[key] === null || project[key] === '') {
+        project[key] = patch[key];
+        changed = true;
+      }
+    });
+  };
+
+  patchProject('project-001', {
+    attachments: {
+      technicalFiles: [{ name: '地质建模技术方案.docx', url: '#' }],
+      qualificationFiles: [{ name: '项目团队资质清单.pdf', url: '#' }],
+      otherFiles: [{ name: '立项会议纪要.pdf', url: '#' }],
+    },
+  });
+  patchProject('project-002', {
+    attachments: {
+      technicalFiles: [{ name: '平台运维服务范围说明.docx', url: '#' }],
+      qualificationFiles: [{ name: '运维团队证书包.zip', url: '#' }],
+      otherFiles: [{ name: '客户沟通纪要.pdf', url: '#' }],
+    },
+  });
+  patchProject('project-003', {
+    attachments: {
+      technicalFiles: [{ name: '致密油藏评价成果清单.xlsx', url: '#' }],
+      qualificationFiles: [{ name: '联营单位资质文件.pdf', url: '#' }],
+      otherFiles: [{ name: '验收申请说明.docx', url: '#' }],
+    },
+  });
+
+  [
+    {
+      id: 'proposal-p1-draft',
+      projectId: 'project-001',
+      title: '新疆油田地质建模技术服务开题报告',
+      content: '围绕地质建模、数据治理、模型校核和成果交付建立项目实施方案。',
+      serviceContent: '资料收集、地质建模、模型校验、成果汇报',
+      teamMembers: [
+        { name: '张明', role: '项目经理', duty: '项目统筹', ratio: 100 },
+        { name: '王磊', role: '技术负责人', duty: '建模方案', ratio: 80 },
+      ],
+      auditStatus: 'draft',
+      submitTime: '',
+      files: [{ name: '开题报告草稿.docx', url: '#' }],
+      createTime: '2026-06-29 10:00:00',
+    },
+    {
+      id: 'proposal-p3-submitted',
+      projectId: 'project-003',
+      title: '致密油藏开发评价开题报告',
+      content: '完成油藏评价目标、数据范围、技术路线和里程碑计划确认。',
+      serviceContent: '油藏评价、开发建议、成果评审',
+      teamMembers: [
+        { name: '张明', role: '项目经理', duty: '项目统筹', ratio: 100 },
+        { name: '赵敏', role: '质量负责人', duty: '成果质检', ratio: 60 },
+      ],
+      auditStatus: 'submitted',
+      submitTime: '2025-06-05 16:20:00',
+      files: [{ name: '开题报告提交版.pdf', url: '#' }],
+      createTime: '2025-06-01 09:00:00',
+    },
+    {
+      id: 'proposal-p5-rejected',
+      projectId: 'project-005',
+      title: '钻井液性能评价开题报告',
+      content: '因客户项目暂停，开题材料退回归档。',
+      serviceContent: '钻井液取样、性能评价、报告编制',
+      teamMembers: [{ name: '张明', role: '项目经理', duty: '项目统筹', ratio: 100 }],
+      auditStatus: 'rejected',
+      rejectReason: '客户暂停项目，暂不进入实施。',
+      submitTime: '2023-03-03 11:00:00',
+      files: [{ name: '退回版开题报告.pdf', url: '#' }],
+      createTime: '2023-03-01 10:30:00',
+    },
+  ].forEach(item => {
+    changed = ensureItem(s.proposals, item) || changed;
+  });
+
+  [
+    {
+      id: 'plan-p1-draft',
+      projectId: 'project-001',
+      version: 'v0.1',
+      planStartDate: '2026-07-01',
+      planEndDate: '2027-06-30',
+      status: 'draft',
+      phases: [
+        { id: 'phase-p1-01', name: '准备阶段', startDate: '2026-07-01', endDate: '2026-08-31', deliverable: '资料清单' },
+        { id: 'phase-p1-02', name: '建模阶段', startDate: '2026-09-01', endDate: '2027-03-31', deliverable: '地质模型' },
+      ],
+      tasks: [{ name: '资料收集与校验', phaseId: 'phase-p1-01', assigneeId: 'u003', assigneeName: '王磊', planStartDate: '2026-07-01', planEndDate: '2026-08-15', workload: 12, preTask: '' }],
+      createTime: '2026-06-30 09:30:00',
+    },
+    {
+      id: 'plan-p3-active',
+      projectId: 'project-003',
+      version: 'v1.0',
+      planStartDate: '2025-06-01',
+      planEndDate: '2026-05-31',
+      status: 'active',
+      phases: [
+        { id: 'phase-p3-01', name: '评价阶段', startDate: '2025-06-01', endDate: '2025-12-31', deliverable: '评价报告' },
+        { id: 'phase-p3-02', name: '交付阶段', startDate: '2026-01-01', endDate: '2026-05-31', deliverable: '验收材料' },
+      ],
+      tasks: [
+        { name: '油藏参数复核', phaseId: 'phase-p3-01', assigneeId: 'u003', assigneeName: '王磊', planStartDate: '2025-06-01', planEndDate: '2025-09-30', workload: 18, preTask: '' },
+        { name: '开发评价报告编制', phaseId: 'phase-p3-02', assigneeId: 'u004', assigneeName: '赵敏', planStartDate: '2026-01-01', planEndDate: '2026-05-20', workload: 22, preTask: '油藏参数复核' },
+      ],
+      createTime: '2025-06-03 09:00:00',
+    },
+    {
+      id: 'plan-p4-archived',
+      projectId: 'project-004',
+      version: 'v0.9',
+      planStartDate: '2024-06-01',
+      planEndDate: '2025-05-31',
+      status: 'archived',
+      archiveReason: '已按最终执行计划完成归档',
+      archiveTime: '2025-05-31 18:00:00',
+      phases: [{ id: 'phase-p4-01', name: '储量评估', startDate: '2024-06-01', endDate: '2025-05-31', deliverable: '储量评估报告' }],
+      tasks: [{ name: '储量评估报告编制', phaseId: 'phase-p4-01', assigneeId: 'u006', assigneeName: '刘洋', planStartDate: '2024-06-01', planEndDate: '2025-05-20', workload: 20, preTask: '' }],
+      createTime: '2024-06-01 09:00:00',
+    },
+  ].forEach(item => {
+    changed = ensureItem(s.plans, item) || changed;
+  });
+
+  [
+    {
+      id: 'task-004',
+      code: 'TASK-PRJ-2025-0088-004',
+      projectId: 'project-002',
+      planId: 'plan-001',
+      phaseId: 'phase-002',
+      phaseName: '执行阶段',
+      taskName: '应急预案演练',
+      description: '组织运维应急预案演练并记录演练问题。',
+      assigneeId: 'u005',
+      assigneeName: '陈强',
+      planStartDate: '2026-07-01',
+      planEndDate: '2026-08-15',
+      actualStartDate: '',
+      actualEndDate: '',
+      workload: 6,
+      preTaskId: '',
+      status: 'dispatched',
+      dispatchTime: '2026-07-02 09:30:00',
+      createTime: '2025-01-12 15:00:00',
+      changeLogs: [
+        { id: 'log-004', action: 'dispatch', time: '2026-07-02 09:30:00', before: {}, after: { assigneeName: '陈强', planStartDate: '2026-07-01', planEndDate: '2026-08-15' }, note: '按运维计划派发' },
+      ],
+    },
+    {
+      id: 'task-005',
+      code: 'TASK-PRJ-2025-0088-005',
+      projectId: 'project-002',
+      planId: 'plan-001',
+      phaseId: 'phase-002',
+      phaseName: '执行阶段',
+      taskName: '旧版接口兼容测试',
+      description: '客户确认旧版接口停用后取消该测试任务。',
+      assigneeId: 'u006',
+      assigneeName: '刘洋',
+      planStartDate: '2025-09-01',
+      planEndDate: '2025-09-20',
+      actualStartDate: '',
+      actualEndDate: '',
+      workload: 4,
+      preTaskId: '',
+      status: 'cancelled',
+      cancelReason: '客户取消旧版接口兼容范围',
+      cancelTime: '2025-09-02 10:00:00',
+      createTime: '2025-01-12 15:00:00',
+    },
+    {
+      id: 'task-p3-001',
+      code: 'TASK-PRJ-2025-0042-001',
+      projectId: 'project-003',
+      planId: 'plan-p3-active',
+      phaseId: 'phase-p3-01',
+      phaseName: '评价阶段',
+      taskName: '油藏参数复核',
+      description: '复核致密油藏关键参数并形成复核记录。',
+      assigneeId: 'u003',
+      assigneeName: '王磊',
+      planStartDate: '2025-06-01',
+      planEndDate: '2025-09-30',
+      actualStartDate: '2025-06-01',
+      actualEndDate: '2025-09-26',
+      workload: 18,
+      preTaskId: '',
+      status: 'completed',
+      auditResult: 'approved',
+      createTime: '2025-06-03 10:00:00',
+    },
+    {
+      id: 'task-p3-002',
+      code: 'TASK-PRJ-2025-0042-002',
+      projectId: 'project-003',
+      planId: 'plan-p3-active',
+      phaseId: 'phase-p3-02',
+      phaseName: '交付阶段',
+      taskName: '开发评价报告编制',
+      description: '编制开发评价报告和验收材料。',
+      assigneeId: 'u004',
+      assigneeName: '赵敏',
+      planStartDate: '2026-01-01',
+      planEndDate: '2026-05-20',
+      actualStartDate: '2026-01-05',
+      actualEndDate: '2026-05-18',
+      workload: 22,
+      preTaskId: 'task-p3-001',
+      status: 'completed',
+      auditResult: 'approved',
+      createTime: '2025-06-03 10:10:00',
+    },
+  ].forEach(item => {
+    changed = ensureItem(s.tasks, item) || changed;
+  });
+
+  [
+    {
+      id: 'del-003',
+      taskId: 'task-004',
+      projectId: 'project-002',
+      name: '应急预案演练记录',
+      fileType: 'report',
+      version: 'v0.1',
+      files: [{ name: '演练记录草稿.docx', url: '#' }],
+      auditStatus: 'draft',
+      uploadTime: '2026-07-03 11:00:00',
+      uploaderName: '陈强',
+      createTime: '2026-07-03 11:00:00',
+    },
+    {
+      id: 'del-p3-001',
+      taskId: 'task-p3-001',
+      projectId: 'project-003',
+      name: '油藏参数复核记录',
+      fileType: 'report',
+      version: 'v1.0',
+      files: [{ name: '参数复核记录.pdf', url: '#' }],
+      auditStatus: 'approved',
+      uploadTime: '2025-09-26 17:00:00',
+      uploaderName: '王磊',
+      createTime: '2025-09-26 17:00:00',
+    },
+    {
+      id: 'del-p3-002',
+      taskId: 'task-p3-002',
+      projectId: 'project-003',
+      name: '开发评价报告',
+      fileType: 'report',
+      version: 'v1.0',
+      files: [{ name: '开发评价报告.pdf', url: '#' }],
+      auditStatus: 'approved',
+      uploadTime: '2026-05-18 17:00:00',
+      uploaderName: '赵敏',
+      createTime: '2026-05-18 17:00:00',
+    },
+  ].forEach(item => {
+    changed = ensureItem(s.deliverables, item) || changed;
+  });
+
+  [
+    { id: 'role-p1-001', projectId: 'project-001', userId: 'u001', userName: '张明', roleType: 'pm', ratio: 100, joinDate: '2026-06-28' },
+    { id: 'role-p1-002', projectId: 'project-001', userId: 'u003', userName: '王磊', roleType: 'tech', ratio: 80, joinDate: '2026-06-28' },
+    { id: 'role-p3-001', projectId: 'project-003', userId: 'u001', userName: '张明', roleType: 'pm', ratio: 100, joinDate: '2025-06-01' },
+    { id: 'role-p3-002', projectId: 'project-003', userId: 'u004', userName: '赵敏', roleType: 'qa', ratio: 60, joinDate: '2025-06-01' },
+  ].forEach(item => {
+    changed = ensureItem(s.projectRoles, item) || changed;
+  });
+
+  [
+    { id: 'ms-p1-001', projectId: 'project-001', name: '开题报告', type: 'start', planDate: '2026-07-15', actualDate: '', status: 'in_progress', acceptorName: '张明' },
+    { id: 'ms-p1-002', projectId: 'project-001', name: '中期评审', type: 'stage', planDate: '2027-01-31', actualDate: '', status: 'not_started', acceptorName: '张明' },
+    { id: 'ms-p5-001', projectId: 'project-005', name: '开题报告', type: 'start', planDate: '2023-03-10', actualDate: '2023-03-08', status: 'rejected', acceptorName: '张明' },
+  ].forEach(item => {
+    changed = ensureItem(s.milestones, item) || changed;
+  });
+
+  [
+    { id: 'review-001', taskId: 'task-001', projectId: 'project-002', conclusion: 'approved', opinion: '巡检报告内容完整，同意通过。', reviewTime: '2025-06-29 09:00:00' },
+    { id: 'review-002', taskId: 'task-002', projectId: 'project-002', conclusion: 'rejected', opinion: '月报缺少服务 SLA 达成说明。', reviewTime: '2025-06-30 14:20:00' },
+    { id: 'review-p3-001', taskId: 'task-p3-001', projectId: 'project-003', conclusion: 'approved', opinion: '参数复核记录通过。', reviewTime: '2025-09-27 09:20:00' },
+    { id: 'review-p3-002', taskId: 'task-p3-002', projectId: 'project-003', conclusion: 'approved', opinion: '开发评价报告通过。', reviewTime: '2026-05-19 10:30:00' },
+  ].forEach(item => {
+    changed = ensureItem(s.resultReviews, item) || changed;
+  });
+
+  [
+    {
+      id: 'rect-002',
+      code: 'RECT-202506-002',
+      taskId: 'task-002',
+      projectId: 'project-002',
+      description: '月报缺少 SLA 达成说明',
+      requirement: '补充 SLA 指标及客户确认记录',
+      assigneeId: 'u006',
+      assigneeName: '刘洋',
+      deadline: '2025-07-03',
+      status: 'rectifying',
+      createTime: '2025-06-30 15:00:00',
+      history: [{ action: 'start', time: '2025-07-01 09:00:00' }],
+    },
+    {
+      id: 'rect-003',
+      code: 'RECT-202506-003',
+      taskId: 'task-002',
+      projectId: 'project-002',
+      description: '运维截图不清晰',
+      requirement: '重新上传关键截图',
+      assigneeId: 'u006',
+      assigneeName: '刘洋',
+      deadline: '2025-07-04',
+      status: 'reviewing',
+      createTime: '2025-06-30 15:10:00',
+      history: [{ action: 'submit', time: '2025-07-02 10:00:00' }],
+    },
+    {
+      id: 'rect-004',
+      code: 'RECT-202506-004',
+      taskId: 'task-001',
+      projectId: 'project-002',
+      description: '补充风险闭环说明',
+      requirement: '已补充并复核关闭',
+      assigneeId: 'u005',
+      assigneeName: '陈强',
+      deadline: '2025-07-01',
+      status: 'closed',
+      createTime: '2025-06-28 10:00:00',
+      verifyTime: '2025-06-30 11:00:00',
+    },
+    {
+      id: 'rect-005',
+      code: 'RECT-202506-005',
+      taskId: 'task-002',
+      projectId: 'project-002',
+      description: '报告格式需统一',
+      requirement: '按模板重新排版',
+      assigneeId: 'u006',
+      assigneeName: '刘洋',
+      deadline: '2025-07-05',
+      status: 'returned',
+      createTime: '2025-06-30 15:20:00',
+      verifyOpinion: '排版仍不符合模板',
+    },
+    {
+      id: 'rect-p3-acc-001',
+      code: 'RECT-202606-001',
+      taskId: 'task-p3-002',
+      projectId: 'project-003',
+      acceptanceId: 'acc-p3-conditional',
+      source: 'acceptance',
+      description: '验收有条件通过遗留项',
+      requirement: '补充开发建议风险清单后申请复验',
+      assigneeId: 'u004',
+      assigneeName: '赵敏',
+      deadline: '2026-06-20',
+      status: 'pending',
+      createTime: '2026-06-10 10:30:00',
+    },
+  ].forEach(item => {
+    changed = ensureItem(s.rectifications, item) || changed;
+  });
+
+  [
+    {
+      id: 'acc-p2-interim',
+      code: 'ACC-2025-0001',
+      projectId: 'project-002',
+      acceptanceType: 'interim',
+      acceptanceDate: '2025-12-30',
+      conclusion: 'passed',
+      opinion: '中期验收通过，继续按计划推进。',
+      files: [{ name: '中期验收记录.pdf', url: '#' }],
+      revoked: false,
+      createTime: '2025-12-30 16:00:00',
+    },
+    {
+      id: 'acc-p3-conditional',
+      code: 'ACC-2026-0002',
+      projectId: 'project-003',
+      acceptanceType: 'final',
+      acceptanceDate: '2026-06-10',
+      conclusion: 'conditional',
+      opinion: '成果基本满足要求，补充风险清单后复验。',
+      files: [{ name: '有条件验收意见.pdf', url: '#' }],
+      revoked: false,
+      createTime: '2026-06-10 10:00:00',
+    },
+    {
+      id: 'acc-p4-final',
+      code: 'ACC-2025-0003',
+      projectId: 'project-004',
+      acceptanceType: 'final',
+      acceptanceDate: '2025-05-30',
+      conclusion: 'passed',
+      opinion: '最终验收通过，项目归档。',
+      files: [{ name: '最终验收报告.pdf', url: '#' }],
+      revoked: false,
+      createTime: '2025-05-30 17:00:00',
+    },
+    {
+      id: 'acc-p5-failed',
+      code: 'ACC-2023-0004',
+      projectId: 'project-005',
+      acceptanceType: 'final',
+      acceptanceDate: '2023-08-20',
+      conclusion: 'failed',
+      opinion: '客户终止项目，验收不通过并归档终止。',
+      files: [{ name: '终止验收说明.pdf', url: '#' }],
+      revoked: false,
+      createTime: '2023-08-20 15:00:00',
+    },
+  ].forEach(item => {
+    changed = ensureItem(s.acceptances, item) || changed;
+  });
+
+  return changed;
+}
+
 export function ensurePhase2() {
   const s = loadStore();
   const keys = ['projectRoles', 'proposals', 'plans', 'tasks', 'deliverables', 'milestones', 'resultReviews', 'rectifications', 'acceptances'];
@@ -268,6 +752,9 @@ export function ensurePhase2() {
     });
     Object.assign(s.counters, seed.counters);
     s._phase2Seeded = true;
+    saveStore();
+  }
+  if (ensurePhase2Coverage(s)) {
     saveStore();
   }
   return s;
@@ -389,7 +876,7 @@ export function syncRolesFromProposal(proposal) {
       userId: `u${100 + idx}`,
       userName: m.name,
       roleType: roleMap[m.role] || 'member',
-      ratio: m.ratio || 0,
+      ratio: m.ratio ?? 100,
       joinDate: today(),
     });
   });
@@ -566,6 +1053,28 @@ function resolvePreTaskId(plan, projectId, preTaskName, existingTasks) {
   return match?.id || '';
 }
 
+/** 计划生效/修订时，将里程碑计划日期与阶段周期对齐 */
+export function syncMilestonesFromPlan(plan) {
+  const s = ensurePhase2();
+  if (!plan?.projectId) return;
+  const msList = s.milestones.filter(m => m.projectId === plan.projectId);
+  if (!msList.length) return;
+  const phases = plan.phases || [];
+  const midPhase = phases.length > 1 ? phases[Math.floor((phases.length - 1) / 2)] : phases[0];
+  const deliverPhase = phases.find(p => /成果|交付/.test(p.deliverable || p.name || '')) || phases[phases.length - 1] || phases[0];
+  const acceptPhase = phases[phases.length - 1] || phases[0];
+
+  msList.forEach(m => {
+    m.planId = plan.id;
+    m.planVersion = plan.version || '';
+    if (m.name === '中期评审') m.planDate = midPhase?.endDate || plan.planEndDate || m.planDate;
+    else if (m.name === '成果交付') m.planDate = deliverPhase?.endDate || plan.planEndDate || m.planDate;
+    else if (m.name === '项目验收') m.planDate = plan.planEndDate || acceptPhase?.endDate || m.planDate;
+    else if (m.name === '开题报告' && !m.planDate) m.planDate = phases[0]?.endDate || plan.planStartDate || m.planDate;
+  });
+  saveStore();
+}
+
 export function activatePlan(planId) {
   const s = ensurePhase2();
   const plan = s.plans.find(x => x.id === planId);
@@ -613,6 +1122,7 @@ export function activatePlan(planId) {
       createTime: now(),
     });
   });
+  syncMilestonesFromPlan(plan);
   saveStore();
   return mockResponse(plan);
 }
@@ -1040,16 +1550,21 @@ export function getTaskStats(projectId) {
 
 export function getProjectDetailAggregated(projectId) {
   const s = ensurePhase2();
-  const project = s.projects.find(p => p.id === projectId);
+  const project = syncProjectContracts(
+    s.projects.find(p => p.id === projectId),
+    s,
+  );
   if (!project) return null;
-  const contract = s.contracts.find(c => c.id === project.contractId);
+  const contracts = project.contracts || [];
+  const contract = contracts[0] || s.contracts.find(c => c.id === project.contractId);
   const tasks = s.tasks.filter(t => t.projectId === projectId && t.status !== 'cancelled').map(withTaskDisplayStatus);
+  const contractAmount = contracts.reduce((sum, item) => sum + (Number(item.contractAmount) || 0), 0);
   return {
     ...project,
     pomsStatus: project.status,
     customName: project.customerName,
     customerName: project.customerName,
-    projectAmount: project.budget,
+    projectAmount: contractAmount || project.budget,
     budget: project.budget,
     deliveryDate: project.planEndDate,
     projectManagerName: project.projectManagerName,
@@ -1064,6 +1579,7 @@ export function getProjectDetailAggregated(projectId) {
     acceptanceHistory: s.acceptances.filter(a => a.projectId === projectId).sort((a, b) => (b.createTime || '').localeCompare(a.createTime || '')),
     rectifications: s.rectifications.filter(r => r.projectId === projectId),
     contract,
+    contracts,
     attachments: project.attachments || { technicalFiles: [], qualificationFiles: [], otherFiles: [] },
     taskStats: getTaskStats(projectId),
   };

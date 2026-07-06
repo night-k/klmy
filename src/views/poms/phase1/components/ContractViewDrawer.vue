@@ -1,13 +1,5 @@
 <template>
-  <el-drawer
-    v-model="visible"
-    :title="null"
-    size="780px"
-    append-to-body
-    destroy-on-close
-    class="contract-view-drawer"
-    @closed="$emit('closed')"
-  >
+  <el-drawer v-model="visible" :title="null" size="780px" append-to-body destroy-on-close class="contract-view-drawer" @closed="$emit('closed')">
     <div v-if="detail" v-loading="loading" class="contract-view">
       <div class="contract-view__hero">
         <div class="contract-view__hero-main">
@@ -87,13 +79,7 @@
       <div v-if="actionItems.length" class="contract-view__actions">
         <div class="contract-view__actions-title">合同操作</div>
         <div class="contract-view__actions-btns">
-          <el-button
-            v-for="item in actionItems"
-            :key="item.key"
-            :type="item.type"
-            plain
-            @click="$emit(item.event, detail)"
-          >
+          <el-button v-for="item in actionItems" :key="item.key" :type="item.type" plain @click="$emit(item.event, detail)">
             {{ item.label }}
           </el-button>
         </div>
@@ -104,13 +90,7 @@
 
 <script>
 import BidFilePanel from './BidFilePanel.vue';
-import {
-  CONTRACT_TYPE,
-  CONTRACT_STATUS,
-  CONTRACT_STATUS_TAG,
-  PAYMENT_NODE,
-  labelOf,
-} from '../option/dict';
+import { CONTRACT_TYPE, CONTRACT_STATUS, CONTRACT_STATUS_TAG, PAYMENT_NODE, labelOf } from '../option/dict';
 
 export default {
   name: 'ContractViewDrawer',
@@ -120,17 +100,7 @@ export default {
     detail: { type: Object, default: null },
     loading: { type: Boolean, default: false },
   },
-  emits: [
-    'update:modelValue',
-    'closed',
-    'edit-contract',
-    'submit-approval',
-    'mark-signed',
-    'project-init',
-    'view-project',
-    'go-payment',
-    'save-files',
-  ],
+  emits: ['update:modelValue', 'closed', 'edit-contract', 'submit-approval', 'mark-signed', 'project-init', 'view-project', 'go-payment', 'save-files'],
   data() {
     return {
       fileEditing: false,
@@ -158,9 +128,7 @@ export default {
       return !this.fileEditing;
     },
     actionItems() {
-      const items = [
-        { key: 'edit', label: '编辑合同', type: 'info', event: 'edit-contract' },
-      ];
+      const items = [{ key: 'edit', label: '编辑合同', type: 'info', event: 'edit-contract' }];
       if (this.detail?.contractStatus === 'draft') {
         items.push({ key: 'approval', label: '提交审批', type: 'primary', event: 'submit-approval' });
       }

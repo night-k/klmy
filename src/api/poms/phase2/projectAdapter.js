@@ -1,7 +1,7 @@
 /**
  * 项目列表/空间 Mock 适配层 — 伪装 PMIS 接口签名
  */
-import { loadStore, saveStore, createProjectFromContract } from '../phase1/mockStore';
+import { loadStore, saveStore, createProjectFromContract, attachContractsToProject } from '../phase1/mockStore';
 import { ensurePhase2, getProjectDetailAggregated, getTaskStats, passMilestone, submitAcceptance, updateProjectRoles } from './phase2Store';
 
 function mockResponse(data) {
@@ -16,6 +16,7 @@ function mapProjectToListRow(p) {
     completed: 10,
     terminated: 6,
   };
+  const contractAmount = (p.contracts || []).reduce((sum, item) => sum + (Number(item.contractAmount) || 0), 0);
   return {
     id: p.id,
     code: p.code,
@@ -24,12 +25,14 @@ function mapProjectToListRow(p) {
     customerName: p.customerName,
     contractCode: p.contractCode,
     contractId: p.contractId,
+    contractIds: p.contractIds || [],
+    contracts: p.contracts || [],
     cooperationType: p.cooperationType,
     partnerCompany: p.partnerCompany,
     serviceType: p.serviceType,
     projectManagerId: p.projectManagerId,
     projectManagerName: p.projectManagerName,
-    projectAmount: p.budget,
+    projectAmount: contractAmount || p.budget,
     budget: p.budget,
     deliveryDate: p.planEndDate,
     planStartDate: p.planStartDate,
@@ -138,6 +141,10 @@ export function remove(id) {
 
 export function initFromContract(contractId, formData) {
   return createProjectFromContract(contractId, formData);
+}
+
+export function attachContracts(projectId, contractIds) {
+  return attachContractsToProject(projectId, contractIds);
 }
 
 export function submitProjectAcceptance(row) {

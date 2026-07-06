@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="visible" :title="isEdit ? '编辑项目计划' : '新增项目计划'" width="960px" append-to-body destroy-on-close :close-on-click-modal="false" @closed="handleClosed">
+  <el-drawer v-model="visible" :title="isEdit ? '编辑项目计划' : '新增项目计划'" size="960px" append-to-body destroy-on-close class="plan-edit-drawer" @closed="handleClosed">
     <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
       <el-row :gutter="16">
         <el-col :span="8">
@@ -127,13 +127,13 @@
       <el-button link type="primary" style="margin-top: 8px" @click="addTask">+ 添加任务</el-button>
     </el-form>
 
-    <template #footer>
+    <div class="plan-edit-drawer__footer">
       <el-button @click="visible = false">取消</el-button>
       <el-button type="primary" :loading="saving" @click="save">保存草稿</el-button>
       <el-button v-if="form.id && form.status !== 'active'" type="success" :loading="activating" @click="saveAndActivate">计划生效</el-button>
       <el-button v-if="isEdit && form.status === 'active'" type="warning" plain :loading="activating" @click="saveAndActivate">修订并重新生效</el-button>
-    </template>
-  </el-dialog>
+    </div>
+  </el-drawer>
 </template>
 
 <script>
@@ -146,7 +146,7 @@ function newPhase(idx = 1) {
 }
 
 export default {
-  name: 'PlanEditDialog',
+  name: 'PlanEditDrawer',
   emits: ['success'],
   data() {
     return {
@@ -418,6 +418,17 @@ export default {
 </script>
 
 <style scoped>
+.plan-edit-drawer__footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 16px;
+  margin-top: 8px;
+  background: var(--el-bg-color);
+  border-top: 1px solid var(--el-border-color-lighter);
+}
 .summary-row {
   display: flex;
   justify-content: space-between;
@@ -431,5 +442,17 @@ export default {
 .summary-stats strong {
   color: #e6a23c;
   font-weight: 600;
+}
+</style>
+
+<style lang="scss">
+.plan-edit-drawer {
+  .el-drawer__header {
+    margin-bottom: 0;
+    padding: 16px 20px 0;
+  }
+  .el-drawer__body {
+    padding: 12px 20px 20px;
+  }
 }
 </style>

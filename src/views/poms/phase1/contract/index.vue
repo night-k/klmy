@@ -113,11 +113,13 @@ export default {
     openView(row) {
       this.viewLoading = true;
       this.viewVisible = true;
-      getDetail(row.id).then(res => {
-        this.viewDetail = { paymentPlans: [], contractFiles: [], ...res.data.data };
-      }).finally(() => {
-        this.viewLoading = false;
-      });
+      getDetail(row.id)
+        .then(res => {
+          this.viewDetail = { paymentPlans: [], contractFiles: [], ...res.data.data };
+        })
+        .finally(() => {
+          this.viewLoading = false;
+        });
     },
     refreshViewDetail(id) {
       if (!this.viewVisible || !id) return;
@@ -145,20 +147,22 @@ export default {
       });
     },
     markSigned(row) {
-      this.$confirm('确认合同已签订？').then(() => {
-        const payload = {
-          ...row,
-          contractStatus: 'signed',
-          signDate: row.signDate || new Date().toISOString().slice(0, 10),
-        };
-        return update(payload);
-      }).then(res => {
-        const detail = res?.data?.data || { ...row, contractStatus: 'signed' };
-        syncContractPayments(detail);
-        this.$message.success('合同状态已更新为已签，可进行项目立项');
-        this.onLoad(this.page);
-        this.refreshViewDetail(row.id);
-      });
+      this.$confirm('确认合同已签订？')
+        .then(() => {
+          const payload = {
+            ...row,
+            contractStatus: 'signed',
+            signDate: row.signDate || new Date().toISOString().slice(0, 10),
+          };
+          return update(payload);
+        })
+        .then(res => {
+          const detail = res?.data?.data || { ...row, contractStatus: 'signed' };
+          syncContractPayments(detail);
+          this.$message.success('合同状态已更新为已签，可进行项目立项');
+          this.onLoad(this.page);
+          this.refreshViewDetail(row.id);
+        });
     },
     goProjectInit() {
       this.viewVisible = false;
@@ -218,7 +222,9 @@ export default {
       }
     },
     beforeOpen(done, type) {
-      const open = () => this.$nextTick(() => done());
+      const open = () => {
+        this.$nextTick(() => done());
+      };
       if (type === 'edit') {
         getDetail(this.form.id).then(res => {
           this.form = { paymentPlans: [], contractFiles: [], ...res.data.data };
@@ -268,43 +274,67 @@ export default {
         loading();
         return;
       }
-      add({ ...row, paymentPlans: row.paymentPlans || [], contractFiles: row.contractFiles || [] }).then(res => {
-        const contract = res.data.data;
-        if (row.winbidId && contract) {
-          updateWinbid({
-            id: row.winbidId,
-            contractStatus: 'generated',
-            contractId: contract.id,
-            contractCode: contract.code,
-          });
-        }
-        this.onLoad(this.page);
-        done();
-      }).finally(() => loading());
+      add({ ...row, paymentPlans: row.paymentPlans || [], contractFiles: row.contractFiles || [] })
+        .then(res => {
+          const contract = res.data.data;
+          if (row.winbidId && contract) {
+            updateWinbid({
+              id: row.winbidId,
+              contractStatus: 'generated',
+              contractId: contract.id,
+              contractCode: contract.code,
+            });
+          }
+          this.onLoad(this.page);
+          done();
+        })
+        .finally(() => loading());
     },
     rowUpdate(row, index, done, loading) {
-      update({ ...row, paymentPlans: row.paymentPlans || [], contractFiles: row.contractFiles || [] }).then(() => {
-        this.onLoad(this.page);
-        this.refreshViewDetail(row.id);
-        done();
-      }).finally(() => loading());
+      update({ ...row, paymentPlans: row.paymentPlans || [], contractFiles: row.contractFiles || [] })
+        .then(() => {
+          this.onLoad(this.page);
+          this.refreshViewDetail(row.id);
+          done();
+        })
+        .finally(() => loading());
     },
     rowDel(row) {
-      this.$confirm('确定删除？').then(() => remove(row.id)).then(() => this.onLoad(this.page));
+      this.$confirm('确定删除？')
+        .then(() => remove(row.id))
+        .then(() => this.onLoad(this.page));
     },
-    searchReset() { this.query = {}; this.onLoad(this.page); },
-    searchChange(params, done) { this.query = params; this.page.currentPage = 1; this.onLoad(this.page); done(); },
-    currentChange(p) { this.page.currentPage = p; },
-    sizeChange(s) { this.page.pageSize = s; },
-    refreshChange() { this.onLoad(this.page); },
+    searchReset() {
+      this.query = {};
+      this.onLoad(this.page);
+    },
+    searchChange(params, done) {
+      this.query = params;
+      this.page.currentPage = 1;
+      this.onLoad(this.page);
+      done();
+    },
+    currentChange(p) {
+      this.page.currentPage = p;
+    },
+    sizeChange(s) {
+      this.page.pageSize = s;
+    },
+    refreshChange() {
+      this.onLoad(this.page);
+    },
     onLoad(page) {
       this.loading = true;
       const q = { ...this.query };
       if (this.tabSignGroup) q.signGroup = this.tabSignGroup;
-      getPage(page.currentPage, page.pageSize, q).then(res => {
-        this.page.total = res.data.data.total;
-        this.data = res.data.data.records;
-      }).finally(() => { this.loading = false; });
+      getPage(page.currentPage, page.pageSize, q)
+        .then(res => {
+          this.page.total = res.data.data.total;
+          this.data = res.data.data.records;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
   },
 };

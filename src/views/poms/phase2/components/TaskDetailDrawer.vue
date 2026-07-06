@@ -1,17 +1,27 @@
 <template>
-  <el-drawer v-model="visible" :title="`任务详情 · ${task.taskName || ''}`" size="820px" append-to-body destroy-on-close @closed="$emit('closed')">
-    <div v-if="taskId" v-loading="loading" class="task-detail-drawer">
+  <el-drawer v-model="visible" :title="null" size="860px" append-to-body destroy-on-close class="task-detail-drawer" @closed="$emit('closed')">
+    <div v-if="taskId" v-loading="loading" class="task-detail">
+      <div class="task-detail__hero">
+        <div>
+          <div class="task-detail__code">{{ task.code }}</div>
+          <h2 class="task-detail__title">{{ task.taskName }}</h2>
+          <div class="task-detail__tags">
+            <el-tag :type="TASK_STATUS_TAG[task.status]" effect="dark" round size="small">{{ labelOf(TASK_STATUS, task.status) }}</el-tag>
+            <el-tag type="primary" effect="plain" round size="small">{{ task.projectName }}</el-tag>
+            <el-tag v-if="task.phaseName" type="info" effect="plain" round size="small">{{ task.phaseName }}</el-tag>
+          </div>
+        </div>
+        <div class="task-detail__meta">
+          <div class="task-detail__meta-value">{{ task.workload || 0 }}</div>
+          <div class="task-detail__meta-label">人·天</div>
+        </div>
+      </div>
+
       <el-collapse v-model="activePanels">
         <el-collapse-item title="基本信息" name="base">
           <el-descriptions :column="2" border size="small">
-            <el-descriptions-item label="任务编号">{{ task.code }}</el-descriptions-item>
-            <el-descriptions-item label="状态">
-              <el-tag size="small" :type="TASK_STATUS_TAG[task.status]">{{ labelOf(TASK_STATUS, task.status) }}</el-tag>
-            </el-descriptions-item>
-            <el-descriptions-item label="项目名称">{{ task.projectName }}</el-descriptions-item>
-            <el-descriptions-item label="所属阶段">{{ task.phaseName || '-' }}</el-descriptions-item>
             <el-descriptions-item label="责任人">{{ task.assigneeName || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="工作量">{{ task.workload || 0 }} 人·天</el-descriptions-item>
+            <el-descriptions-item label="成果物数">{{ task.deliverableCount || 0 }}</el-descriptions-item>
             <el-descriptions-item label="计划周期">{{ task.planStartDate }} ~ {{ task.planEndDate }}</el-descriptions-item>
             <el-descriptions-item label="实际周期">{{ task.actualStartDate || '-' }} ~ {{ task.actualEndDate || '-' }}</el-descriptions-item>
           </el-descriptions>
@@ -261,7 +271,47 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+.task-detail {
+  padding: 0 4px 24px;
+}
+.task-detail__hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ecf5ff 0%, #f5f7fa 100%);
+}
+.task-detail__code {
+  font-size: 13px;
+  color: var(--el-text-color-secondary);
+  margin-bottom: 8px;
+}
+.task-detail__title {
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 600;
+}
+.task-detail__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.task-detail__meta {
+  text-align: right;
+  flex-shrink: 0;
+}
+.task-detail__meta-label {
+  font-size: 13px;
+  color: var(--el-text-color-secondary);
+}
+.task-detail__meta-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: #2c7be5;
+}
 .task-desc {
   margin: 0;
   line-height: 1.7;
@@ -274,8 +324,27 @@ export default {
   margin-top: 4px;
 }
 .drawer-actions {
+  position: sticky;
+  bottom: 0;
   margin-top: 16px;
+  padding: 16px 20px;
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
+  background: var(--el-bg-color);
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 8px;
+}
+</style>
+
+<style lang="scss">
+.task-detail-drawer {
+  .el-drawer__header {
+    margin-bottom: 0;
+    padding: 16px 20px 0;
+  }
+  .el-drawer__body {
+    padding: 12px 20px 20px;
+  }
 }
 </style>

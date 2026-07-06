@@ -101,11 +101,13 @@ export default {
     openView(row) {
       this.viewLoading = true;
       this.viewVisible = true;
-      getDetail(row.id).then(res => {
-        this.viewDetail = { ...res.data.data, noticeFiles: res.data.data.noticeFiles || [] };
-      }).finally(() => {
-        this.viewLoading = false;
-      });
+      getDetail(row.id)
+        .then(res => {
+          this.viewDetail = { ...res.data.data, noticeFiles: res.data.data.noticeFiles || [] };
+        })
+        .finally(() => {
+          this.viewLoading = false;
+        });
     },
     refreshViewDetail(id) {
       if (!this.viewVisible || !id) return;
@@ -153,7 +155,9 @@ export default {
       }
     },
     beforeOpen(done, type) {
-      const open = () => this.$nextTick(() => done());
+      const open = () => {
+        this.$nextTick(() => done());
+      };
       if (type === 'edit') {
         getDetail(this.form.id).then(res => {
           this.form = { ...res.data.data, noticeFiles: res.data.data.noticeFiles || [] };
@@ -178,37 +182,61 @@ export default {
         loading();
         return;
       }
-      add({ ...row, contractStatus: 'pending', noticeFiles: row.noticeFiles || [] }).then(() => {
-        this.onLoad(this.page);
-        done();
-      }).finally(() => loading());
+      add({ ...row, contractStatus: 'pending', noticeFiles: row.noticeFiles || [] })
+        .then(() => {
+          this.onLoad(this.page);
+          done();
+        })
+        .finally(() => loading());
     },
     rowUpdate(row, index, done, loading) {
-      update({ ...row, noticeFiles: row.noticeFiles || [] }).then(() => {
-        this.onLoad(this.page);
-        done();
-      }).finally(() => loading());
+      update({ ...row, noticeFiles: row.noticeFiles || [] })
+        .then(() => {
+          this.onLoad(this.page);
+          done();
+        })
+        .finally(() => loading());
     },
     rowDel(row) {
-      this.$confirm('确定删除？').then(() => remove(row.id)).then(() => this.onLoad(this.page));
+      this.$confirm('确定删除？')
+        .then(() => remove(row.id))
+        .then(() => this.onLoad(this.page));
     },
-    searchReset() { this.query = {}; this.onLoad(this.page); },
+    searchReset() {
+      this.query = {};
+      this.onLoad(this.page);
+    },
     onTabChange() {
       this.page.currentPage = 1;
       this.onLoad(this.page);
     },
-    searchChange(params, done) { this.query = params; this.page.currentPage = 1; this.onLoad(this.page); done(); },
-    currentChange(p) { this.page.currentPage = p; },
-    sizeChange(s) { this.page.pageSize = s; },
-    refreshChange() { this.onLoad(this.page); },
+    searchChange(params, done) {
+      this.query = params;
+      this.page.currentPage = 1;
+      this.onLoad(this.page);
+      done();
+    },
+    currentChange(p) {
+      this.page.currentPage = p;
+    },
+    sizeChange(s) {
+      this.page.pageSize = s;
+    },
+    refreshChange() {
+      this.onLoad(this.page);
+    },
     onLoad(page) {
       this.loading = true;
       const q = { ...this.query };
       if (this.tabContractStatus) q.contractStatus = this.tabContractStatus;
-      getPage(page.currentPage, page.pageSize, q).then(res => {
-        this.page.total = res.data.data.total;
-        this.data = res.data.data.records;
-      }).finally(() => { this.loading = false; });
+      getPage(page.currentPage, page.pageSize, q)
+        .then(res => {
+          this.page.total = res.data.data.total;
+          this.data = res.data.data.records;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
   },
 };

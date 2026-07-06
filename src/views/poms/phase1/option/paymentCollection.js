@@ -1,6 +1,6 @@
 import { PAYMENT_STATUS } from './dict';
 
-export const Option = _this => ({
+export const Option = () => ({
   border: true,
   index: true,
   viewBtn: false,
