@@ -93,15 +93,19 @@ export default {
         return;
       }
       this.saving = true;
-      this.$emit('save', { ...this.form, noticeFiles: this.form.noticeFiles || [] }, {
-        done: () => {
-          this.saving = false;
-          this.visible = false;
+      this.$emit(
+        'save',
+        { ...this.form, noticeFiles: this.form.noticeFiles || [] },
+        {
+          done: () => {
+            this.saving = false;
+            this.visible = false;
+          },
+          loading: () => {
+            this.saving = false;
+          },
         },
-        loading: () => {
-          this.saving = false;
-        },
-      });
+      );
     },
     handleClosed() {
       this.saving = false;
