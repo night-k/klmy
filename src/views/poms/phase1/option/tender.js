@@ -1,12 +1,11 @@
-import { TENDER_METHOD, TENDER_RESULT } from './dict';
+import { TENDER_METHOD, TENDER_RESULT, WIN_CONTRACT_STATUS } from './dict';
 
 export const Option = _this => ({
   border: true,
   index: true,
   viewBtn: false,
-  editBtn: true,
-  delBtn: true,
-  addBtn: true,
+  addBtn: false,
+  editBtn: false,
   dialogWidth: '80%',
   dialogClickModal: false,
   searchSpan: 6,
@@ -50,6 +49,9 @@ export const Option = _this => ({
     { label: '中标金额', prop: 'winAmount', type: 'number', precision: 2, addDisplay: false, editDisplay: false, viewDisplay: false, hide: true },
     { label: '中标日期', prop: 'winDate', type: 'date', valueFormat: 'YYYY-MM-DD', addDisplay: false, editDisplay: false, viewDisplay: false, hide: true },
     { label: '通知书编号', prop: 'winNoticeNo', addDisplay: false, editDisplay: false, viewDisplay: false, hide: true },
+    { label: '中标编号', prop: 'winbidCode', addDisplay: false, editDisplay: false, minWidth: 140 },
+    { label: '合同状态', prop: 'contractStatus', type: 'select', dicData: WIN_CONTRACT_STATUS, addDisplay: false, editDisplay: false, minWidth: 110 },
+    { label: '关联合同', prop: 'contractCode', addDisplay: false, editDisplay: false, minWidth: 130 },
     { label: '备注', prop: 'remark', type: 'textarea', span: 24, hide: true },
     {
       label: '投标文件',

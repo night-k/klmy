@@ -10,13 +10,9 @@
       ref="crud"
       v-model:page="page"
       v-model:search="search"
-      v-model="form"
       :option="option"
       :table-loading="loading"
       :data="data"
-      :before-open="beforeOpen"
-      @row-save="rowSave"
-      @row-update="rowUpdate"
       @row-del="rowDel"
       @search-change="searchChange"
       @search-reset="searchReset"
@@ -25,8 +21,12 @@
       @refresh-change="refreshChange"
       @on-load="onLoad"
     >
+      <template #menu-left>
+        <el-button type="primary" @click="handleAdd">新增客户</el-button>
+      </template>
       <template #menu="{ row, size }">
         <el-button type="primary" link :size="size" @click="openView(row)">查看</el-button>
+        <el-button type="primary" link :size="size" @click="handleEdit(row)">编辑</el-button>
       </template>
       <template #code="{ row }">
         <el-link type="primary" @click="openView(row)">{{ row.code }}</el-link>
@@ -39,20 +39,22 @@
     </avue-crud>
 
     <customer-view-drawer v-model="viewVisible" :detail="viewDetail" :loading="viewLoading" :history="viewHistory" :history-loading="viewHistoryLoading" @edit="editFromView" @closed="onViewClosed" />
+
+    <crud-form-drawer ref="editRef" :crud-option="option" add-title="新增客户" edit-title="编辑客户" @save="handleFormSave" />
   </basic-container>
 </template>
 
 <script>
 import CustomerViewDrawer from '../components/CustomerViewDrawer.vue';
+import CrudFormDrawer from '../components/CrudFormDrawer.vue';
 import { Option } from '../option/customer';
 import { CUSTOMER_STATUS, labelOf } from '../option/dict';
 import { getPage, getDetail, add, update, remove, getHistory } from '@/api/poms/phase1/customer';
 
 export default {
-  components: { CustomerViewDrawer },
+  components: { CustomerViewDrawer, CrudFormDrawer },
   data() {
     return {
-      form: {},
       search: {},
       query: {},
       loading: false,
@@ -90,59 +92,36 @@ export default {
           this.viewHistoryLoading = false;
         });
     },
+    handleAdd() {
+      this.$refs.editRef?.open({ status: 'normal', managerUserName: '张明', contacts: [] });
+    },
+    handleEdit(row) {
+      getDetail(row.id).then(res => {
+        this.$refs.editRef?.open({ ...res.data.data });
+      });
+    },
     editFromView(detail) {
       this.viewVisible = false;
-      const index = this.data.findIndex(item => item.id === detail.id);
-      this.$nextTick(() => {
-        getDetail(detail.id).then(res => {
-          this.form = { ...res.data.data };
-          if (index >= 0) {
-            this.$refs.crud.rowEdit(this.form, index);
-          } else {
-            this.$refs.crud.rowEdit(this.form, 0);
+      this.handleEdit(detail);
+    },
+    handleFormSave(row, { done, loading }) {
+      const request = row.id ? update(row) : add(row);
+      request
+        .then(() => {
+          this.onLoad(this.page);
+          this.$message.success(row.id ? '更新成功' : '保存成功');
+          if (this.viewVisible && row.id && this.viewDetail?.id === row.id) {
+            getDetail(row.id).then(res => {
+              this.viewDetail = { ...res.data.data };
+            });
           }
-        });
-      });
+          done();
+        })
+        .finally(() => loading());
     },
     onViewClosed() {
       this.viewDetail = null;
       this.viewHistory = null;
-    },
-    beforeOpen(done, type) {
-      const open = () => {
-        this.$nextTick(() => done());
-      };
-      if (type === 'edit') {
-        getDetail(this.form.id).then(res => {
-          this.form = { ...res.data.data };
-          open();
-        });
-        return;
-      }
-      if (type === 'view') {
-        open();
-        return;
-      }
-      this.form = { status: 'normal', managerUserName: '张明', contacts: [] };
-      open();
-    },
-    rowSave(row, done, loading) {
-      add(row)
-        .then(() => {
-          this.onLoad(this.page);
-          this.$message.success('保存成功');
-          done();
-        })
-        .finally(() => loading());
-    },
-    rowUpdate(row, index, done, loading) {
-      update(row)
-        .then(() => {
-          this.onLoad(this.page);
-          this.$message.success('更新成功');
-          done();
-        })
-        .finally(() => loading());
     },
     rowDel(row) {
       this.$confirm('确定删除？')

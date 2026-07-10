@@ -161,7 +161,7 @@ export default {
         })
         .then(res => {
           this.viewDetail = res.data.data;
-          this.$refs.paymentViewDrawer?.closeNodeDialog();
+          this.$refs.paymentViewDrawer?.closeNodeDrawer();
           this.loadAll();
         })
         .finally(() => {

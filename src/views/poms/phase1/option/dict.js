@@ -35,19 +35,13 @@ export const OPP_SOURCE = [
 ];
 
 export const OPP_STAGE = [
-  { label: '初步接触', value: 'contact' },
-  { label: '需求确认', value: 'requirement' },
-  { label: '方案沟通', value: 'proposal' },
-  { label: '报价', value: 'quote' },
-  { label: '谈判', value: 'negotiation' },
-  { label: '已赢', value: 'won' },
-  { label: '已输', value: 'lost' },
+  { label: '已登记', value: 'registered' },
+  { label: '信息补充', value: 'supplement' },
+  { label: '转招投标', value: 'tender' },
 ];
 
 export const OPP_STATUS = [
-  { label: '进行中', value: 'ongoing' },
-  { label: '已赢', value: 'won' },
-  { label: '已输', value: 'lost' },
+  { label: '已登记', value: 'ongoing' },
   { label: '已挂起', value: 'suspended' },
 ];
 

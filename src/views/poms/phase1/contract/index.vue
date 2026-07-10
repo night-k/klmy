@@ -10,13 +10,9 @@
       ref="crud"
       v-model:page="page"
       v-model:search="search"
-      v-model="form"
       :option="option"
       :table-loading="loading"
       :data="data"
-      :before-open="beforeOpen"
-      @row-save="rowSave"
-      @row-update="rowUpdate"
       @row-del="rowDel"
       @search-change="searchChange"
       @search-reset="searchReset"
@@ -25,23 +21,18 @@
       @refresh-change="refreshChange"
       @on-load="onLoad"
     >
+      <template #menu-left>
+        <el-button type="primary" @click="handleAdd">新增合同</el-button>
+      </template>
       <template #menu="{ row, size }">
         <el-button type="primary" link :size="size" @click="openView(row)">查看</el-button>
+        <el-button type="primary" link :size="size" @click="handleEdit(row)">编辑</el-button>
       </template>
       <template #contractStatus="{ row }">
         <el-tag :type="CONTRACT_STATUS_TAG[row.contractStatus]">{{ labelOf(CONTRACT_STATUS, row.contractStatus) }}</el-tag>
       </template>
       <template #code="{ row }">
         <el-link type="primary" @click="openView(row)">{{ row.code }}</el-link>
-      </template>
-      <template #contractFiles-form>
-        <bid-file-panel
-          v-model="form.contractFiles"
-          upload-label="将合同附件拖到此处"
-          hint-text="支持 PDF、Word、图片、ZIP，单文件不超过 5MB"
-          empty-text="暂无合同附件"
-          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.zip,.rar"
-        />
       </template>
     </avue-crud>
 
@@ -58,6 +49,18 @@
       @save-files="saveContractFiles"
       @closed="viewDetail = null"
     />
+
+    <crud-form-drawer ref="editRef" :crud-option="option" add-title="新增合同" edit-title="编辑合同" size="860px" @save="handleFormSave">
+      <template #contractFiles="{ form }">
+        <bid-file-panel
+          v-model="form.contractFiles"
+          upload-label="将合同附件拖到此处"
+          hint-text="支持 PDF、Word、图片、ZIP，单文件不超过 5MB"
+          empty-text="暂无合同附件"
+          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.zip,.rar"
+        />
+      </template>
+    </crud-form-drawer>
   </basic-container>
 </template>
 
@@ -65,6 +68,7 @@
 import { Option } from '../option/contract';
 import BidFilePanel from '../components/BidFilePanel.vue';
 import ContractViewDrawer from '../components/ContractViewDrawer.vue';
+import CrudFormDrawer from '../components/CrudFormDrawer.vue';
 import { CONTRACT_STATUS, CONTRACT_STATUS_TAG, labelOf } from '../option/dict';
 import { getPage, getDetail, add, update, remove } from '@/api/poms/phase1/contract';
 import { getList as getWinbids, getDetail as getWinbidDetail, update as updateWinbid } from '@/api/poms/phase1/winbid';
@@ -73,11 +77,10 @@ import { getDetail as getOpportunityDetail } from '@/api/poms/phase1/opportunity
 import { syncContractPayments } from '@/api/poms/phase1/mockStore';
 
 export default {
-  components: { BidFilePanel, ContractViewDrawer },
+  components: { BidFilePanel, ContractViewDrawer, CrudFormDrawer },
   data() {
     return {
       tabSignGroup: '',
-      form: {},
       search: {},
       query: {},
       loading: false,
@@ -100,9 +103,7 @@ export default {
       return;
     }
     if (winbidId && action === 'add') {
-      this.$nextTick(() => {
-        if (this.$refs.crud) this.$refs.crud.rowAdd();
-      });
+      this.$nextTick(() => this.handleAdd(winbidId));
     }
   },
   methods: {
@@ -134,10 +135,81 @@ export default {
         this.$message.success('合同附件已保存');
       });
     },
+    handleAdd(presetWinbidId) {
+      this.loadWinbids().then(() => {
+        const form = {
+          contractStatus: 'draft',
+          contractType: 'tech_service',
+          winbidId: '',
+          paymentPlans: [],
+          contractFiles: [],
+        };
+        const winbidId = presetWinbidId || this.$route.query.winbidId;
+        if (winbidId) {
+          const applyWinbid = w => {
+            if (w && !this.winbids.find(x => x.id === w.id)) {
+              this.winbids.push(w);
+              const col = this.findObject(this.option.column, 'winbidId');
+              if (col) {
+                col.dicData = this.winbids.map(item => ({
+                  id: item.id,
+                  name: `${item.code} - ${item.projectName}`,
+                }));
+              }
+            }
+            form.winbidId = winbidId;
+            this.onWinbidChange(winbidId, form);
+            this.$refs.editRef?.open(form);
+          };
+          const cached = this.winbids.find(x => x.id === winbidId);
+          if (cached) {
+            applyWinbid(cached);
+          } else {
+            getWinbidDetail(winbidId).then(res => applyWinbid(res.data.data));
+          }
+          return;
+        }
+        this.$refs.editRef?.open(form);
+      });
+    },
+    handleEdit(row) {
+      this.loadWinbids().then(() => {
+        getDetail(row.id).then(res => {
+          this.$refs.editRef?.open({ paymentPlans: [], contractFiles: [], ...res.data.data });
+        });
+      });
+    },
     editFromView(row) {
       this.viewVisible = false;
-      const index = this.data.findIndex(item => item.id === row.id);
-      if (index >= 0) this.$refs.crud.rowEdit(row, index);
+      this.handleEdit(row);
+    },
+    handleFormSave(row, { done, loading }) {
+      if (!row.id && !row.winbidId) {
+        this.$message.warning('请选择中标记录');
+        loading();
+        return;
+      }
+      const payload = { ...row, paymentPlans: row.paymentPlans || [], contractFiles: row.contractFiles || [] };
+      const request = row.id ? update(payload) : add(payload);
+      request
+        .then(res => {
+          if (!row.id && row.winbidId) {
+            const contract = res.data.data;
+            if (contract) {
+              updateWinbid({
+                id: row.winbidId,
+                contractStatus: 'generated',
+                contractId: contract.id,
+                contractCode: contract.code,
+              });
+            }
+          }
+          this.onLoad(this.page);
+          this.$message.success(row.id ? '更新成功' : '保存成功');
+          this.refreshViewDetail(row.id);
+          done();
+        })
+        .finally(() => loading());
     },
     submitApproval(row) {
       update({ ...row, contractStatus: 'approving' }).then(() => {
@@ -196,108 +268,46 @@ export default {
         { node: 'warranty', ratio: 5, amount: Math.round(total * 0.05), planDate: '' },
       ];
     },
-    onWinbidChange(id) {
+    onWinbidChange(id, targetForm) {
       const w = this.winbids.find(x => x.id === id);
       if (!w) return;
-      this.form.winbidId = id;
-      this.form.winbidCode = w.code;
-      this.form.customerName = w.customerName;
-      this.form.projectName = w.projectName;
-      this.form.contractAmount = w.winAmount;
-      this.form.contractType = 'tech_service';
-      this.form.contractStatus = 'draft';
-      this.form.paymentPlans = this.buildPaymentPlans(w.winAmount);
+      const patch = {
+        winbidId: id,
+        winbidCode: w.code,
+        customerName: w.customerName,
+        projectName: w.projectName,
+        contractAmount: w.winAmount,
+        contractType: 'tech_service',
+        contractStatus: 'draft',
+        paymentPlans: this.buildPaymentPlans(w.winAmount),
+      };
+      if (targetForm) {
+        Object.assign(targetForm, patch);
+      } else {
+        this.$refs.editRef?.setForm(patch);
+      }
       if (w.tenderId) {
         getTenderDetail(w.tenderId).then(res => {
           const t = res.data.data;
-          if (!t) return;
-          if (t.opportunityId) {
-            this.form.opportunityId = t.opportunityId;
-            getOpportunityDetail(t.opportunityId).then(oppRes => {
-              const opp = oppRes.data.data;
-              if (opp?.customerId) this.form.customerId = opp.customerId;
-            });
-          }
-        });
-      }
-    },
-    beforeOpen(done, type) {
-      const open = () => {
-        this.$nextTick(() => done());
-      };
-      if (type === 'edit') {
-        getDetail(this.form.id).then(res => {
-          this.form = { paymentPlans: [], contractFiles: [], ...res.data.data };
-          open();
-        });
-        return;
-      }
-      this.loadWinbids().then(() => {
-        this.form = {
-          contractStatus: 'draft',
-          contractType: 'tech_service',
-          winbidId: '',
-          paymentPlans: [],
-          contractFiles: [],
-        };
-        const { winbidId } = this.$route.query;
-        if (winbidId) {
-          const applyWinbid = w => {
-            if (w && !this.winbids.find(x => x.id === w.id)) {
-              this.winbids.push(w);
-              const col = this.findObject(this.option.column, 'winbidId');
-              if (col) {
-                col.dicData = this.winbids.map(item => ({
-                  id: item.id,
-                  name: `${item.code} - ${item.projectName}`,
-                }));
-              }
-            }
-            this.form.winbidId = winbidId;
-            this.onWinbidChange(winbidId);
-            open();
-          };
-          const cached = this.winbids.find(x => x.id === winbidId);
-          if (cached) {
-            applyWinbid(cached);
+          if (!t?.opportunityId) return;
+          const more = { opportunityId: t.opportunityId };
+          if (targetForm) {
+            Object.assign(targetForm, more);
           } else {
-            getWinbidDetail(winbidId).then(res => applyWinbid(res.data.data));
+            this.$refs.editRef?.setForm(more);
           }
-          return;
-        }
-        open();
-      });
-    },
-    rowSave(row, done, loading) {
-      if (!row.winbidId) {
-        this.$message.warning('请选择中标记录');
-        loading();
-        return;
+          getOpportunityDetail(t.opportunityId).then(oppRes => {
+            const opp = oppRes.data.data;
+            if (!opp?.customerId) return;
+            const customerPatch = { customerId: opp.customerId };
+            if (targetForm) {
+              Object.assign(targetForm, customerPatch);
+            } else {
+              this.$refs.editRef?.setForm(customerPatch);
+            }
+          });
+        });
       }
-      add({ ...row, paymentPlans: row.paymentPlans || [], contractFiles: row.contractFiles || [] })
-        .then(res => {
-          const contract = res.data.data;
-          if (row.winbidId && contract) {
-            updateWinbid({
-              id: row.winbidId,
-              contractStatus: 'generated',
-              contractId: contract.id,
-              contractCode: contract.code,
-            });
-          }
-          this.onLoad(this.page);
-          done();
-        })
-        .finally(() => loading());
-    },
-    rowUpdate(row, index, done, loading) {
-      update({ ...row, paymentPlans: row.paymentPlans || [], contractFiles: row.contractFiles || [] })
-        .then(() => {
-          this.onLoad(this.page);
-          this.refreshViewDetail(row.id);
-          done();
-        })
-        .finally(() => loading());
     },
     rowDel(row) {
       this.$confirm('确定删除？')

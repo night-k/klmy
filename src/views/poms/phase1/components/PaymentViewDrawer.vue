@@ -73,7 +73,7 @@
       </el-card>
     </div>
 
-    <el-dialog v-model="nodeDialogVisible" :title="nodeDialogTitle" width="520px" append-to-body destroy-on-close @closed="resetNodeForm">
+    <el-drawer v-model="nodeDrawerVisible" :title="nodeDrawerTitle" size="520px" append-to-body destroy-on-close class="payment-node-drawer" @closed="resetNodeForm">
       <div v-if="editingNode" class="payment-view__node-summary">
         <span>{{ labelOf(PAYMENT_NODE, editingNode.planNode) }}</span>
         <span>计划 ¥ {{ formatAmount(editingNode.planAmount) }}</span>
@@ -107,11 +107,11 @@
           <el-input v-model="nodeForm.remark" type="textarea" :rows="2" placeholder="可选，填写回款说明" />
         </el-form-item>
       </el-form>
-      <template #footer>
-        <el-button @click="nodeDialogVisible = false">取消</el-button>
+      <div class="payment-node-drawer__footer">
+        <el-button @click="nodeDrawerVisible = false">取消</el-button>
         <el-button type="primary" :loading="saving" @click="submitNode">保存</el-button>
-      </template>
-    </el-dialog>
+      </div>
+    </el-drawer>
   </el-drawer>
 </template>
 
@@ -129,7 +129,7 @@ export default {
   emits: ['update:modelValue', 'closed', 'save-node'],
   data() {
     return {
-      nodeDialogVisible: false,
+      nodeDrawerVisible: false,
       editingNode: null,
       nodeForm: {
         actualDate: '',
@@ -171,14 +171,14 @@ export default {
       const actual = Number(this.detail?.receivedTotal) || 0;
       return Math.max(0, plan - actual);
     },
-    nodeDialogTitle() {
+    nodeDrawerTitle() {
       if (!this.editingNode) return '登记实际回款';
       return this.hasActualReceipt(this.editingNode) ? '修改实际回款' : '登记实际回款';
     },
   },
   watch: {
     detail() {
-      this.nodeDialogVisible = false;
+      this.nodeDrawerVisible = false;
       this.editingNode = null;
     },
   },
@@ -199,7 +199,7 @@ export default {
         invoiceStatus: row.invoiceStatus || 'not_invoiced',
         remark: row.remark || '',
       };
-      this.nodeDialogVisible = true;
+      this.nodeDrawerVisible = true;
     },
     resetNodeForm() {
       this.editingNode = null;
@@ -213,8 +213,8 @@ export default {
         });
       });
     },
-    closeNodeDialog() {
-      this.nodeDialogVisible = false;
+    closeNodeDrawer() {
+      this.nodeDrawerVisible = false;
     },
   },
 };
@@ -343,12 +343,33 @@ export default {
 </style>
 
 <style lang="scss">
+.payment-node-drawer__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 16px;
+  margin-top: 8px;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+</style>
+
+<style lang="scss">
 .payment-view-drawer {
   .el-drawer__header {
     margin-bottom: 0;
     padding: 16px 20px 0;
   }
 
+  .el-drawer__body {
+    padding: 12px 20px 20px;
+  }
+}
+
+.payment-node-drawer {
+  .el-drawer__header {
+    margin-bottom: 0;
+    padding: 16px 20px 0;
+  }
   .el-drawer__body {
     padding: 12px 20px 20px;
   }

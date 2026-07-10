@@ -37,14 +37,45 @@
 
       <el-card v-if="detail.result === 'won'" shadow="never" class="tender-view__section tender-view__section--success">
         <template #header>
-          <span class="tender-view__section-title">中标信息</span>
+          <div class="tender-view__section-head">
+            <span class="tender-view__section-title">中标信息</span>
+            <el-tag v-if="detail.contractStatus" :type="detail.contractStatus === 'generated' ? 'success' : 'warning'" effect="plain">
+              {{ labelOf(WIN_CONTRACT_STATUS, detail.contractStatus) }}
+            </el-tag>
+          </div>
         </template>
         <el-descriptions v-if="hasWinInfo" :column="2" border>
+          <el-descriptions-item label="中标编号">{{ detail.winbidCode || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="合同状态">{{ labelOf(WIN_CONTRACT_STATUS, detail.contractStatus) }}</el-descriptions-item>
           <el-descriptions-item label="中标金额">¥ {{ formatAmount(detail.winAmount) }}</el-descriptions-item>
           <el-descriptions-item label="中标日期">{{ detail.winDate || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="通知书编号" :span="2">{{ detail.winNoticeNo || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="通知书编号">{{ detail.winNoticeNo || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="服务期">{{ detail.servicePeriod || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="履约保证金">¥ {{ formatAmount(detail.performanceBond) }}</el-descriptions-item>
+          <el-descriptions-item label="中标服务费">¥ {{ formatAmount(detail.serviceFee) }}</el-descriptions-item>
+          <el-descriptions-item label="关联合同" :span="2">{{ detail.contractCode || '-' }}</el-descriptions-item>
         </el-descriptions>
         <el-empty v-else description="登记中标后显示中标金额、日期及通知书编号" :image-size="64" />
+      </el-card>
+
+      <el-card v-if="detail.result === 'won' && hasWinInfo" shadow="never" class="tender-view__section">
+        <template #header>
+          <div class="tender-view__section-head">
+            <span class="tender-view__section-title">中标通知书</span>
+            <el-button type="primary" link @click="toggleNoticeFileEdit">
+              {{ noticeFileEditing ? '完成' : '管理文件' }}
+            </el-button>
+          </div>
+        </template>
+        <bid-file-panel
+          v-model="localNoticeFiles"
+          :readonly="noticeFileReadonly"
+          upload-label="将中标通知书拖到此处"
+          hint-text="支持 PDF、Word、图片，单文件不超过 5MB"
+          empty-text="暂无中标通知书"
+          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+          @change="handleNoticeFilesChange"
+        />
       </el-card>
 
       <el-card shadow="never" class="tender-view__section">
@@ -73,7 +104,7 @@
 
 <script>
 import BidFilePanel from './BidFilePanel.vue';
-import { TENDER_METHOD, TENDER_RESULT, TENDER_RESULT_TAG, labelOf } from '../option/dict';
+import { TENDER_METHOD, TENDER_RESULT, TENDER_RESULT_TAG, WIN_CONTRACT_STATUS, labelOf } from '../option/dict';
 
 export default {
   name: 'TenderViewDrawer',
@@ -83,14 +114,17 @@ export default {
     detail: { type: Object, default: null },
     loading: { type: Boolean, default: false },
   },
-  emits: ['update:modelValue', 'closed', 'edit-result', 'edit-tender', 'register-winbid', 'save-files'],
+  emits: ['update:modelValue', 'closed', 'edit-result', 'edit-tender', 'edit-winbid', 'register-winbid', 'create-contract', 'view-contract', 'save-files', 'save-notice-files'],
   data() {
     return {
       fileEditing: false,
+      noticeFileEditing: false,
       localBidFiles: [],
+      localNoticeFiles: [],
       TENDER_METHOD,
       TENDER_RESULT,
       TENDER_RESULT_TAG,
+      WIN_CONTRACT_STATUS,
       labelOf,
     };
   },
@@ -106,6 +140,9 @@ export default {
     fileReadonly() {
       return !this.fileEditing;
     },
+    noticeFileReadonly() {
+      return !this.noticeFileEditing;
+    },
     hasWinInfo() {
       const d = this.detail;
       return !!(d?.winAmount || d?.winDate || d?.winNoticeNo);
@@ -118,6 +155,14 @@ export default {
       if (this.detail?.result === 'won' && !this.hasWinInfo) {
         items.push({ key: 'register-winbid', label: '登记中标', type: 'success', event: 'register-winbid' });
       }
+      if (this.detail?.result === 'won' && this.hasWinInfo) {
+        items.push({ key: 'edit-winbid', label: '编辑中标', type: 'success', event: 'edit-winbid' });
+        if (this.detail?.contractStatus === 'generated') {
+          items.push({ key: 'view-contract', label: '查看合同', type: 'success', event: 'view-contract' });
+        } else {
+          items.push({ key: 'create-contract', label: '生成合同', type: 'primary', event: 'create-contract' });
+        }
+      }
       return items;
     },
   },
@@ -126,7 +171,9 @@ export default {
       immediate: true,
       handler(val) {
         this.localBidFiles = val?.bidFiles ? [...val.bidFiles] : [];
+        this.localNoticeFiles = val?.noticeFiles ? [...val.noticeFiles] : [];
         this.fileEditing = false;
+        this.noticeFileEditing = false;
       },
     },
   },
@@ -140,8 +187,16 @@ export default {
         this.$emit('save-files', { ...this.detail, bidFiles: files });
       }
     },
+    handleNoticeFilesChange(files) {
+      if (this.noticeFileEditing) {
+        this.$emit('save-notice-files', { ...this.detail, noticeFiles: files });
+      }
+    },
     toggleFileEdit() {
       this.fileEditing = !this.fileEditing;
+    },
+    toggleNoticeFileEdit() {
+      this.noticeFileEditing = !this.noticeFileEditing;
     },
   },
 };

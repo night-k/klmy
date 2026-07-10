@@ -22,7 +22,7 @@
 
       <el-card shadow="never" class="opp-view__section">
         <template #header>
-          <span class="opp-view__section-title">跟进阶段</span>
+          <span class="opp-view__section-title">登记状态</span>
         </template>
         <el-steps :active="stageActive" :process-status="stageProcessStatus" align-center finish-status="success">
           <el-step v-for="item in STAGE_STEPS" :key="item.value" :title="item.label" />
@@ -45,16 +45,10 @@
         </el-descriptions>
       </el-card>
 
-      <el-card v-if="detail.status === 'lost' && detail.lostReason" shadow="never" class="opp-view__section opp-view__section--danger">
-        <template #header>
-          <span class="opp-view__section-title">失败原因</span>
-        </template>
-        <div class="opp-view__lost-reason">{{ detail.lostReason }}</div>
-      </el-card>
-
       <div v-if="actionItems.length" class="opp-view__actions">
         <div class="opp-view__actions-title">商机操作</div>
         <div class="opp-view__actions-btns">
+          <el-button type="primary" plain @click="$emit('edit', detail)">编辑商机</el-button>
           <el-button v-for="item in actionItems" :key="item.key" :type="item.type" plain @click="$emit(item.event, detail)">
             {{ item.label }}
           </el-button>
@@ -67,7 +61,7 @@
 <script>
 import { OPP_SOURCE, OPP_STAGE, OPP_STATUS, OPP_STATUS_TAG, PROJECT_TYPE, labelOf } from '../option/dict';
 
-const STAGE_FLOW = ['contact', 'requirement', 'proposal', 'quote', 'negotiation'];
+const STAGE_FLOW = ['registered', 'supplement', 'tender'];
 
 export default {
   name: 'OpportunityViewDrawer',
@@ -76,7 +70,7 @@ export default {
     detail: { type: Object, default: null },
     loading: { type: Boolean, default: false },
   },
-  emits: ['update:modelValue', 'closed', 'advance', 'rollback', 'mark-won', 'mark-lost', 'suspend', 'resume', 'create-tender', 'go-customer'],
+  emits: ['update:modelValue', 'closed', 'edit', 'suspend', 'resume', 'create-tender', 'go-customer'],
   data() {
     return {
       OPP_SOURCE,
@@ -104,37 +98,15 @@ export default {
     },
     stageActive() {
       if (!this.detail) return 0;
-      if (this.detail.stage === 'won') return STAGE_FLOW.length;
-      if (this.detail.stage === 'lost') {
-        const idx = STAGE_FLOW.indexOf('negotiation');
-        return idx >= 0 ? idx : STAGE_FLOW.length - 1;
-      }
       const idx = STAGE_FLOW.indexOf(this.detail.stage);
       return idx >= 0 ? idx : 0;
     },
     stageProcessStatus() {
-      if (this.detail?.stage === 'lost') return 'error';
       if (this.detail?.status === 'suspended') return 'wait';
       return 'process';
     },
     isOngoing() {
       return this.detail?.status === 'ongoing';
-    },
-    canAdvanceStage() {
-      if (!this.detail) return false;
-      const idx = STAGE_FLOW.indexOf(this.detail.stage);
-      return this.isOngoing && idx >= 0 && idx < STAGE_FLOW.length - 1;
-    },
-    canRollbackStage() {
-      if (!this.detail) return false;
-      const idx = STAGE_FLOW.indexOf(this.detail.stage);
-      return this.isOngoing && idx > 0;
-    },
-    canMarkWon() {
-      return this.isOngoing && this.detail?.stage === 'negotiation';
-    },
-    canMarkLost() {
-      return this.isOngoing;
     },
     canSuspend() {
       return this.isOngoing;
@@ -143,17 +115,13 @@ export default {
       return this.detail?.status === 'suspended';
     },
     canCreateTender() {
-      return this.detail?.status === 'won' || this.detail?.stage === 'won';
+      return this.detail?.status === 'ongoing';
     },
     actionItems() {
       const items = [];
-      if (this.canAdvanceStage) items.push({ key: 'advance', label: '推进阶段', type: 'primary', event: 'advance' });
-      if (this.canRollbackStage) items.push({ key: 'rollback', label: '回退阶段', type: 'info', event: 'rollback' });
-      if (this.canMarkWon) items.push({ key: 'mark-won', label: '标记已赢', type: 'success', event: 'mark-won' });
-      if (this.canMarkLost) items.push({ key: 'mark-lost', label: '标记已输', type: 'danger', event: 'mark-lost' });
+      if (this.canCreateTender) items.push({ key: 'create-tender', label: '转入招投标', type: 'success', event: 'create-tender' });
       if (this.canSuspend) items.push({ key: 'suspend', label: '挂起', type: 'warning', event: 'suspend' });
       if (this.canResume) items.push({ key: 'resume', label: '恢复跟进', type: 'primary', event: 'resume' });
-      if (this.canCreateTender) items.push({ key: 'create-tender', label: '创建投标', type: 'success', event: 'create-tender' });
       return items;
     },
   },

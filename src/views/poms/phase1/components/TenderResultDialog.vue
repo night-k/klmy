@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="visible" title="修改中标结果" width="420px" append-to-body destroy-on-close @closed="handleClosed">
+  <el-drawer v-model="visible" title="修改中标结果" size="420px" append-to-body destroy-on-close class="tender-result-drawer" @closed="handleClosed">
     <el-form ref="formRef" :model="form" :rules="rules" label-width="90px">
       <el-form-item label="中标结果" prop="result">
         <el-select v-model="form.result" placeholder="请选择" style="width: 100%">
@@ -8,11 +8,11 @@
       </el-form-item>
       <el-alert v-if="form.result === 'won'" type="info" :closable="false" show-icon title="标记为中标后，请通过「登记中标」填写中标金额、日期及通知书编号。" />
     </el-form>
-    <template #footer>
+    <div class="tender-result-drawer__footer">
       <el-button @click="visible = false">取消</el-button>
       <el-button type="primary" :loading="submitting" @click="handleSubmit">保存</el-button>
-    </template>
-  </el-dialog>
+    </div>
+  </el-drawer>
 </template>
 
 <script>
@@ -81,3 +81,26 @@ export default {
   },
 };
 </script>
+
+<style scoped lang="scss">
+.tender-result-drawer__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 16px;
+  margin-top: 8px;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+</style>
+
+<style lang="scss">
+.tender-result-drawer {
+  .el-drawer__header {
+    margin-bottom: 0;
+    padding: 16px 20px 0;
+  }
+  .el-drawer__body {
+    padding: 12px 20px 20px;
+  }
+}
+</style>
