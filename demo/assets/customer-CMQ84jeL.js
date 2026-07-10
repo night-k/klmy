@@ -1,0 +1,1 @@
+import{a as s,c as a}from"./mockStore-BgsyPJfO.js";const t=a("customers"),r=t.getPage,c=t.getList,d=t.getDetail,g=t.add,i=t.update,n=t.remove,u=e=>Promise.resolve({data:{code:200,success:!0,data:s(e)}});export{g as a,d as b,u as c,c as d,r as g,n as r,i as u};
