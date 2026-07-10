@@ -1,1 +1,0 @@
-import{B as s}from"./main-DkV7wB6G.js";import{a}from"./base64-0FQqd29e.js";const o=s+"/llm/conversation",m=t=>a({url:o+"/list",method:"get",params:t}),d=t=>a({url:o+"/save",method:"post",data:t}),p=t=>a({url:o+"/update",method:"post",data:t}),l=t=>a({url:o+"/remove",method:"post",params:{ids:t}});export{d as a,m as g,l as r,p as u};

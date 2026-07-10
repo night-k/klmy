@@ -1,1 +1,0 @@
-var t={VITE_APP_ENV:"production",VITE_APP_API:"/api",VITE_APP_BASE:"/klmy/",VITE_META_URL:"http://192.168.0.47:9210",VITE_BUILD_COMPRESS:"gzip",BASE_URL:"/klmy/",MODE:"github",DEV:!1,PROD:!0,SSR:!1},o={};const i=(()=>{let e="development";try{typeof import.meta<"u"&&t?e="github":typeof process<"u"&&o&&(e="production")}catch{e="development"}return e!=="production"})();export{i};

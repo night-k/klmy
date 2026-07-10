@@ -1,1 +1,0 @@
-import{passMilestone as t,createCrudApi as o}from"./phase2Store-CNt4kQ0M.js";import{canPassMilestone as l,revokeMilestone as m}from"./phase2Store-CNt4kQ0M.js";import"./mockStore-BJvZGcu4.js";const e=o("milestones"),n=e.getPage,i=e.getDetail,p=e.add,r=e.update,c=t;export{p as add,l as canPassMilestone,i as getDetail,n as getPage,c as pass,m as revokeMilestone,r as update};

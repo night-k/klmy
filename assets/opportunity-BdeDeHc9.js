@@ -1,1 +1,0 @@
-import{createCrudApi as e}from"./mockStore-BJvZGcu4.js";const t=e("opportunities"),a=t.getPage,s=t.getList,i=t.getDetail,c=t.add,g=t.update,n=t.remove;export{c as add,i as getDetail,s as getList,a as getPage,n as remove,g as update};

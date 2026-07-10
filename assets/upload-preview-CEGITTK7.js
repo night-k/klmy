@@ -1,1 +1,0 @@
-import{w as a,g as i}from"./base64-0FQqd29e.js";import{getDetail as l}from"./attach-DCpNGrUc.js";import{c as n}from"./common-CSPOiI4K.js";const s={methods:{handleUploadPreview(e){n(e.url)?window.open(e.url):l(e.url).then(o=>{if(o.data.code===200){let r=`${o.data.data.link}`,t=a.previewFile+encodeURIComponent(i.encode(r));window.open(t)}})}}};export{s as u};

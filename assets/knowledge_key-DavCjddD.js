@@ -1,1 +1,0 @@
-import{B as o}from"./main-DkV7wB6G.js";import{a as t}from"./base64-0FQqd29e.js";const s=o+"/kb",i=e=>t({url:`${s}/key/generate/${e}`,method:"post"}),u=(e,r={})=>t({url:`${s}/key/list/${e}`,method:"get",params:{current:r.current||1,size:r.size||10,...r}}),m=e=>t({url:`${s}/key/remove`,method:"post",params:{ids:e}});export{i as a,m as d,u as g};

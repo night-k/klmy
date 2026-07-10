@@ -1,1 +1,0 @@
-import{getCustomerHistory as o,createCrudApi as s}from"./mockStore-BJvZGcu4.js";const t=s("customers"),a=t.getPage,c=t.getList,d=t.getDetail,g=t.add,i=t.update,n=t.remove,u=e=>Promise.resolve({data:{code:200,success:!0,data:o(e)}});export{g as add,d as getDetail,u as getHistory,c as getList,a as getPage,n as remove,i as update};

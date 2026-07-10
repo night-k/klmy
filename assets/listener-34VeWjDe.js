@@ -1,1 +1,0 @@
-import"./main-DkV7wB6G.js";import{a as r}from"./base64-0FQqd29e.js";const e="/workflow/design/listener",u=(t,o,s)=>r({url:`${e}/list`,method:"get",params:{...s,current:t,size:o}}),d=t=>r({url:`${e}/remove`,method:"post",params:{ids:t}}),n=t=>r({url:`${e}/submit`,method:"post",data:t}),p=t=>r({url:`${e}/update`,method:"post",data:t});export{n as a,u as g,d as r,p as u};

@@ -1,1 +1,0 @@
-import{au as r}from"./vendor-vue-BRHA4Xbc.js";let s=r();function m(o){s.$nextTick(()=>{var e=document.getElementsByClassName("el-form");e[e.length-1].style.height="calc((100vh - 490px))",e[e.length-1].style.overflow="scroll";var l=document.getElementsByClassName("el-table__row");for(let t=0;t<l.length;t++)l[t].cells.length==o&&(l[t].style.height="40px")})}export{m as p};

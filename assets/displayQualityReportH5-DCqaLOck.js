@@ -1,1 +1,0 @@
-import{r}from"./axios-h5-Ch3f4A27.js";import"./base64-0FQqd29e.js";import"./vendor-element-igtQnshK.js";import"./vendor-vue-BRHA4Xbc.js";import"./vendor-utils--PPHakac.js";const u=t=>r({url:"/qms/barcodeQuality/getQualityReportByCode",method:"get",params:t});export{u as getQualityReportByCode};

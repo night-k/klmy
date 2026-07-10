@@ -1,1 +1,0 @@
-import{d as s}from"./vendor-element-igtQnshK.js";import"./decimal-Dd2JqpXu.js";import{a6 as f}from"./main-DkV7wB6G.js";const y=o=>{let i=s().format("YYYY-MM-DD HH:mm");return o.forEach(t=>{let m=Object.keys(t);t.printTime=i,m.forEach(a=>{let r=t[a];typeof r=="object"&&(Array.isArray(r)||f.isEmpty(r)||Object.keys(r).forEach(e=>{t[a+"."+e]=r[e]}))})}),o};export{y as h};

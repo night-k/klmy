@@ -1,1 +1,0 @@
-import{a as o}from"./common-duaSWD5a.js";import{z as s,A as t,B as a,O as r}from"./vendor-vue-BRHA4Xbc.js";const n={},c={class:"logo"};function i(e,l,p,_,d,f){return s(),t("div",c,[a("span",null,r(e.$website.title),1)])}const $=o(n,[["render",i]]);export{$ as default};

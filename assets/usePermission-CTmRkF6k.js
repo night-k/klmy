@@ -1,1 +1,0 @@
-import{c as o,aA as i}from"./vendor-vue-BRHA4Xbc.js";function c(){const n=i(),e=o(()=>n.getters.permission);return{permission:e,hasPermission:s=>!!e.value[s],hasAnyPermission:s=>s.some(r=>!!e.value[r]),hasAllPermissions:s=>s.every(r=>!!e.value[r])}}export{c as u};
