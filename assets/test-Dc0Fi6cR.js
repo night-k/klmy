@@ -1,0 +1,1 @@
+import{a as o}from"./common-duaSWD5a.js";import{al as a,z as n,A as r,Q as s,I as c,M as d}from"./vendor-vue-BRHA4Xbc.js";const l={name:"wel",data(){return{}},computed:{},created(){},methods:{}};function p(i,e,m,_,u,f){const t=a("basic-container");return n(),r("div",null,[s(t,null,{default:c(()=>e[0]||(e[0]=[d("测试页")])),_:1})])}const b=o(l,[["render",p]]);export{b as default};

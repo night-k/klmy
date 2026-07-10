@@ -1,0 +1,1 @@
+import{createCrudApi as t}from"./phase2Store-CNt4kQ0M.js";import{approveReview as c,rejectReview as s}from"./phase2Store-CNt4kQ0M.js";import"./mockStore-BJvZGcu4.js";const e=t("resultReviews"),i=e.getPage,p=e.getDetail;export{c as approveReview,p as getDetail,i as getPage,s as rejectReview};

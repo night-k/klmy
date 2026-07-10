@@ -1,0 +1,1 @@
+import{c as e}from"./phase3Store-Bs_pSI7b.js";import"./mockStore-BJvZGcu4.js";import"./phase2Store-CNt4kQ0M.js";const t=e(),r=t.getPage,d=t.getDetail,m=t.add,n=t.update,p=t.remove;export{m as add,d as getDetail,r as getPage,p as remove,n as update};

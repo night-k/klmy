@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="360" height="240" viewBox="0 0 360 240" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="360" height="240" fill="#f5f5f7" rx="4" ry="4"/>
+  
+  <!-- 浏览器顶部栏 -->
+  <rect width="360" height="24" fill="#e0e0e2" rx="4" ry="4"/>
+  
+  <!-- 浏览器控制按钮 -->
+  <circle cx="12" cy="12" r="4" fill="#ff6058"/>
+  <circle cx="28" cy="12" r="4" fill="#ffbd2e"/>
+  <circle cx="44" cy="12" r="4" fill="#28c941"/>
+  
+  <!-- 地址栏 -->
+  <rect x="60" y="36" width="240" height="24" fill="white" stroke="#e0e0e2" stroke-width="1" rx="12" ry="12"/>
+  
+  <!-- URL文本 - 缩短URL并减小字体大小 -->
+  <text x="70" y="53" font-family="Arial" font-size="9" fill="#666">https://www.url.com/share?id=xyz</text>
+  
+  <!-- 蓝色箭头 - 使用更淡的蓝色和更细的线条 -->
+  <!-- 箭头头部 - 调整位置和颜色 -->
+  <polygon points="250,80 260,90 240,90" fill="#a8c7fa"/>
+  
+  <!-- 箭头虚线路径 - 调整路径和样式 -->
+  <path d="M250,95 C260,120 270,140 280,160" stroke="#a8c7fa" stroke-width="1" stroke-dasharray="4,4" fill="none"/>
+  
+  <!-- 目标位置指示圆圈 -->
+  <circle cx="280" cy="160" r="5" fill="#a8c7fa" stroke="white" stroke-width="1"/>
+  
+  <!-- 其他浏览器元素 -->
+  <rect x="310" y="36" width="24" height="24" fill="#f8f9fa" rx="4" ry="4"/>
+  <rect x="330" y="36" width="24" height="24" fill="#f8f9fa" rx="4" ry="4"/>
+</svg> 

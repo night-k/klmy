@@ -1,0 +1,1 @@
+import{approveProposal as o,rejectProposal as t,createCrudApi as a}from"./phase2Store-CNt4kQ0M.js";import"./mockStore-BJvZGcu4.js";const e=a("proposals"),s=e.getPage,c=e.getDetail,n=e.add,d=e.update,g=e.remove,i=o,l=t;export{n as add,i as approve,c as getDetail,s as getPage,l as reject,g as remove,d as update};

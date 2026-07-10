@@ -1,0 +1,1 @@
+import{addDeliverable as t,submitDeliverableForReview as o,createCrudApi as a}from"./phase2Store-CNt4kQ0M.js";import"./mockStore-BJvZGcu4.js";const e=a("deliverables"),s=e.getPage,c=e.getDetail,d=t,l=e.update,m=e.remove,n=o;export{d as add,c as getDetail,s as getPage,m as remove,n as submitForReview,l as update};

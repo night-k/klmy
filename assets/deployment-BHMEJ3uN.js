@@ -1,0 +1,1 @@
+import"./main-DkV7wB6G.js";import{a as e}from"./base64-0FQqd29e.js";const o="/workflow/design/deployment",m=(t,r,s)=>e({url:`${o}/list`,method:"get",params:{...s,current:t,size:r}}),c=t=>e({url:`${o}/remove`,method:"post",data:t}),g=t=>e({url:`${o}/changeStatus`,method:"post",data:t}),u=t=>e({url:`${o}/changeCategory`,method:"post",data:t});export{g as a,u as c,m as g,c as r};

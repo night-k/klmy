@@ -1,0 +1,1 @@
+import{a as t}from"./common-duaSWD5a.js";import{al as n,z as r,H as a,I as s,M as c}from"./vendor-vue-BRHA4Xbc.js";const l={};function _(i,e){const o=n("basic-container");return r(),a(o,null,{default:s(()=>e[0]||(e[0]=[c(" hello ")])),_:1})}const p=t(l,[["render",_]]);export{p as default};

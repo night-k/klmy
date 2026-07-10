@@ -1,0 +1,1 @@
+import{a}from"./common-duaSWD5a.js";import{al as s,z as e,H as o,I as c,aB as l,K as i}from"./vendor-vue-BRHA4Xbc.js";const _={};function p(t,u){const r=s("router-view");return e(),o(r,null,{default:c(({Component:n})=>[(e(),o(l,{include:t.$store.getters.tagsKeep},[(e(),o(i(n)))],1032,["include"]))]),_:1})}const d=a(_,[["render",p]]);export{d as default};

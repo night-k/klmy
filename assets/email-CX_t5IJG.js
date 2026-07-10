@@ -1,0 +1,1 @@
+import{createCandidateFromEmail as i,createCrudApi as r}from"./phase4Store-CffbLQEB.js";const t=r("recruitmentEmails"),o=t.getPage,c=t.getList,n=t.getDetail,g=e=>{const a=i(e);return Promise.resolve({data:{code:200,success:!0,data:a}})};export{n as getDetail,c as getList,o as getPage,g as intake};

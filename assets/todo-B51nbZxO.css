@@ -1,0 +1,1 @@
+.nf-dialog{display:flex;flex-direction:column;margin:0!important;position:absolute;top:40%;left:50%;transform:translate(-50%,-40%);max-height:calc(100% - 30px);max-width:calc(100% - 30px)}.nf-dialog .el-dialog__body{flex:1;overflow:auto;padding:10px 20px!important}

@@ -1,0 +1,1 @@
+import{a as r}from"./common-duaSWD5a.js";import{z as c,A as n}from"./vendor-vue-BRHA4Xbc.js";const a={name:"authredirect",created(){window.close();const e=this.$route.query,o=e.state,t=e.code;window.opener.location.href=`${window.location.origin}/#/login?state=${o}&code=${t}`}};function s(e,o,t,i,d,p){return c(),n("div")}const m=r(a,[["render",s]]);export{m as default};

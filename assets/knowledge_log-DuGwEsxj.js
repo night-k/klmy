@@ -1,0 +1,1 @@
+import{B as t}from"./main-DkV7wB6G.js";import{a as e}from"./base64-0FQqd29e.js";const s=t+"/kb",l={getLogList(r,o={}){return e({url:`${s}/log/list/${r}`,method:"get",params:{current:o.current||1,size:o.size||10,...o}})}};export{l as k};

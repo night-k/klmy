@@ -1,0 +1,1 @@
+import{B as t}from"./main-DkV7wB6G.js";import{a}from"./base64-0FQqd29e.js";const r=t+"/oss",m=o=>a({url:r+"/put-file",method:"post",data:o,headers:{"Content-Type":"multipart/form-data"}});export{m as u};

@@ -1,0 +1,1 @@
+import{B as t}from"./main-DkV7wB6G.js";import{a as e}from"./base64-0FQqd29e.js";const s=t+"/rag",l=a=>e({url:s+"/fast-search",method:"post",data:a}),d=a=>e({url:s+"/lite-search",method:"post",data:a}),c=a=>e({url:s+"/knowledge",method:"get",params:a});export{d as a,c as g,l as s};
